@@ -24,36 +24,40 @@ public class JwtService {
     }
 
 
-    public String generateJwtToken(String username) {
+    public String generateJwtToken(Long userId) {
         byte[] keyBytes = secretKey.getBytes();
         SecretKey key = Keys.hmacShaKeyFor(keyBytes);
 
         return Jwts.builder()
                 .subject("user")
                 .subject("simbit_go_api")
-                .claim("username", username)
+                .claim("id", userId)
                 .signWith(key)
                 .compact();
     }
 
     @Nullable
-    public String getUsername(String jws) {
+    public Long getUserId(String jws) {
         byte[] keyBytes = secretKey.getBytes();
         try {
             SecretKey key = Keys.hmacShaKeyFor(keyBytes);
-            return Jwts.parser().verifyWith(key).build().parseSignedClaims(jws).getPayload().get("username").toString();
+            return Long.parseLong(Jwts.parser().verifyWith(key).build()
+                    .parseSignedClaims(jws)
+                    .getPayload()
+                    .get("id")
+                    .toString());
         } catch (SignatureException e) {
             return null;
         }
     }
 
     public boolean isJwtValid(String jws){
-        String username = getUsername(jws);
-        if (username == null) {
+        Long id = getUserId(jws);
+        if (id == null) {
             return false;
         }
 
-        if(repository.existsByUsername(username)){
+        if(repository.existsById(id)){
             return true;
         }
 

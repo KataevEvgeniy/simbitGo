@@ -35,14 +35,12 @@ public class AccountController {
         UserEntity userInDb;
         try {
 
-            userInDb = repository.findUsersEntityByUsername(user.getUsername());
+            userInDb = repository.findUserEntityByUsername(user.getUsername());
             if (userInDb.getPassword().equals(user.getPassword())) {
-                String jws = jwtService.generateJwtToken(user.getUsername());
-
+                String jws = jwtService.generateJwtToken(userInDb.getIdUser());
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Authorization", jws);
-
                 return new ResponseEntity<>("Success", headers, HttpStatus.OK);
             }
         } catch (Exception e) {
@@ -58,14 +56,14 @@ public class AccountController {
     public ResponseEntity<?> me(HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
 
+        try {
+            if (jwtService.isJwtValid(jws)) {
+                Long userId = jwtService.getUserId(jws);
+                UserEntity user = repository.findById(userId).get();
 
-        if (jwtService.isJwtValid(jws)) {
-            String username = jwtService.getUsername(jws);
-            UserEntity user = repository.findUsersEntityByUsername(username);
-
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        }
-
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            }
+        }catch (Exception e){}
         return new ResponseEntity<>("invalid token", HttpStatus.UNAUTHORIZED);
     }
 
@@ -88,8 +86,8 @@ public class AccountController {
         try {
             String jws = request.getHeader("Authorization");
             if (jwtService.isJwtValid(jws) && !repository.existsByUsername(user.getUsername())) {
-                String username = jwtService.getUsername(jws);
-                UserEntity userInDb = repository.findUsersEntityByUsername(username);
+                Long userId = jwtService.getUserId(jws);
+                UserEntity userInDb = repository.findById(userId).get();
                 userInDb.setPassword(user.getPassword());
                 userInDb.setUsername(user.getUsername());
                 repository.save(userInDb);
