@@ -10,10 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -52,6 +49,8 @@ public class AccountController {
             return new ResponseEntity<>("user not found", HttpStatus.NOT_FOUND);
         }
 
+
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
 
@@ -84,5 +83,24 @@ public class AccountController {
         }
     }
 
+    @PutMapping("/Update")
+    public ResponseEntity<?> update(HttpServletRequest request, @RequestBody UserEntity user) {
+        try {
+            String jws = request.getHeader("Authorization");
+            if (jwtService.isJwtValid(jws) && !repository.existsByUsername(user.getUsername())) {
+                String username = jwtService.getUsername(jws);
+                UserEntity userInDb = repository.findUsersEntityByUsername(username);
+                userInDb.setPassword(user.getPassword());
+                userInDb.setUsername(user.getUsername());
+                repository.save(userInDb);
+                return new ResponseEntity<>("user updated", HttpStatus.OK);
+            }
+
+            return new ResponseEntity<>("username already exist", HttpStatus.CONFLICT);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
+        }
+    }
 
 }

@@ -5,6 +5,11 @@
   <artifactId>simbirGo</artifactId>
   <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
+  <properties>
+    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+  </properties>
   <name>simbirGo Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
