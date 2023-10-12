@@ -14,7 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "rents", schema = "public", catalog = "simbir_go")
-public class RentsEntity {
+public class RentEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id_rent")
@@ -47,7 +47,7 @@ public class RentsEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        RentsEntity that = (RentsEntity) o;
+        RentEntity that = (RentEntity) o;
 
         if (idRent != that.idRent) return false;
         if (idTransport != that.idTransport) return false;

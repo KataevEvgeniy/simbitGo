@@ -13,7 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "transport_types", schema = "public", catalog = "simbir_go")
-public class TransportTypesEntity {
+public class TransportTypeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id_transport_type")
@@ -27,7 +27,7 @@ public class TransportTypesEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TransportTypesEntity that = (TransportTypesEntity) o;
+        TransportTypeEntity that = (TransportTypeEntity) o;
 
         if (idTransportType != that.idTransportType) return false;
         if (transportType != null ? !transportType.equals(that.transportType) : that.transportType != null)

@@ -13,7 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "colors", schema = "public", catalog = "simbir_go")
-public class ColorsEntity {
+public class ColorEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id_color")
@@ -28,7 +28,7 @@ public class ColorsEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ColorsEntity that = (ColorsEntity) o;
+        ColorEntity that = (ColorEntity) o;
 
         if (idColor != that.idColor) return false;
         if (color != null ? !color.equals(that.color) : that.color != null) return false;

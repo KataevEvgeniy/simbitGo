@@ -13,7 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "transports", schema = "public", catalog = "simbir_go")
-public class TransportsEntity {
+public class TransportEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id_transport")
@@ -59,7 +59,7 @@ public class TransportsEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TransportsEntity that = (TransportsEntity) o;
+        TransportEntity that = (TransportEntity) o;
 
         if (idTransport != that.idTransport) return false;
         if (canBeRented != that.canBeRented) return false;
