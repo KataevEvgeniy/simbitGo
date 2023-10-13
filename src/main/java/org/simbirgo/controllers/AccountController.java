@@ -2,7 +2,9 @@ package org.simbirgo.controllers;
 
 
 import org.postgresql.util.PSQLException;
+import org.simbirgo.entities.BlacklistEntity;
 import org.simbirgo.entities.UserEntity;
+import org.simbirgo.repositories.BlacklistEntityRepository;
 import org.simbirgo.repositories.UserEntityRepository;
 import org.simbirgo.services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +23,13 @@ public class AccountController {
 
     JwtService jwtService;
     UserEntityRepository repository;
+    BlacklistEntityRepository blacklistEntityRepository;
 
     @Autowired
-    AccountController(JwtService jwtService, UserEntityRepository repository) {
+    AccountController(JwtService jwtService, UserEntityRepository repository, BlacklistEntityRepository blacklistEntityRepository) {
         this.jwtService = jwtService;
         this.repository = repository;
+        this.blacklistEntityRepository = blacklistEntityRepository;
     }
 
 
@@ -63,7 +67,8 @@ public class AccountController {
 
                 return new ResponseEntity<>(user, HttpStatus.OK);
             }
-        }catch (Exception e){}
+        } catch (Exception e) {
+        }
         return new ResponseEntity<>("invalid token", HttpStatus.UNAUTHORIZED);
     }
 
@@ -101,4 +106,17 @@ public class AccountController {
         }
     }
 
+
+    @PostMapping("/SignOut")
+    public ResponseEntity<?> signOut(HttpServletRequest request) {
+        String jws = request.getHeader("Authorization");
+        if (jwtService.isJwtValid(jws)) {
+            if (blacklistEntityRepository.existsByToken(jws)) {
+                return new ResponseEntity<>("token already in blacklist", HttpStatus.OK);
+            }
+            blacklistEntityRepository.save(new BlacklistEntity(jws,0));
+            return new ResponseEntity<>("sign out",HttpStatus.OK);
+        }
+        return new ResponseEntity<>("invalid data",HttpStatus.BAD_REQUEST);
+    }
 }

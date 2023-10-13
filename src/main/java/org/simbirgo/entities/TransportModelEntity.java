@@ -22,6 +22,8 @@ public class TransportModelEntity {
     @Column(name = "model")
     private String model;
 
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
