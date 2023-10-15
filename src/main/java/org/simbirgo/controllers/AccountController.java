@@ -46,13 +46,12 @@ public class AccountController {
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Authorization", jws);
                 return new ResponseEntity<>("Success", headers, HttpStatus.OK);
+            } else{
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
             return new ResponseEntity<>("user not found", HttpStatus.NOT_FOUND);
         }
-
-
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
 
@@ -66,10 +65,12 @@ public class AccountController {
                 UserEntity user = repository.findById(userId).get();
 
                 return new ResponseEntity<>(user, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("unauthorized",HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
+             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("invalid token", HttpStatus.UNAUTHORIZED);
     }
 
     @PostMapping("/SignUp")

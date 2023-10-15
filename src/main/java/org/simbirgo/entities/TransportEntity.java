@@ -1,9 +1,6 @@
 package org.simbirgo.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -12,6 +9,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Table(name = "transports", schema = "public", catalog = "simbir_go")
 public class TransportEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)

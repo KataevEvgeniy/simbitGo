@@ -5,5 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TransportModelRepository extends JpaRepository<TransportModelEntity,Long> {
+public interface TransportModelEntityRepository extends JpaRepository<TransportModelEntity,Long> {
+
+    public TransportModelEntity findByModel(String model);
 }
