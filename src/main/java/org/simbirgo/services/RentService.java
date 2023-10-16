@@ -1,16 +1,19 @@
 package org.simbirgo.services;
 
+import org.simbirgo.entities.PriceTypeEntity;
 import org.simbirgo.entities.RentEntity;
 import org.simbirgo.entities.TransportEntity;
+import org.simbirgo.entities.dto.RentEndData;
 import org.simbirgo.entities.dto.RentFindData;
+import org.simbirgo.repositories.PriceTypeEntityRepository;
 import org.simbirgo.repositories.RentEntityRepository;
 import org.simbirgo.repositories.TransportEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.geo.Point;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +22,7 @@ public class RentService {
 
     TransportEntityRepository transportRepository;
     RentEntityRepository rentRepository;
+    PriceTypeEntityRepository priceTypeRepository;
 
     @Autowired
     RentService(TransportEntityRepository transportRepository, RentEntityRepository rentRepository){
@@ -66,6 +70,39 @@ public class RentService {
 
     public List<RentEntity> getTransportHistory(Long transportId){
         return rentRepository.findAllByIdTransport(transportId);
+    }
+
+    public void rentNew(Long transportId, Long userId, PriceTypeEntity priceType){
+        PriceTypeEntity priceTypeEntityInDb = priceTypeRepository.findByPriceType(priceType.getPriceType());
+        Optional<TransportEntity> transportOpt = transportRepository.findById(transportId);
+
+        if(transportOpt.isPresent()){
+            TransportEntity transport = transportOpt.get();
+            RentEntity rent = new RentEntity();
+            rent.setTimeStart(new Date());
+            rent.setIdTransport(transportId);
+            rent.setIdUser(userId);
+            rent.setIdPriceType(priceType.getIdPriceType());
+            if (priceType.getPriceType().equals("Minutes")) {
+                rent.setPriceOfUnit(transport.getMinutePrice());
+            }
+            if(priceType.getPriceType().equals("Days")){
+                rent.setPriceOfUnit(transport.getDayPrice());
+            }
+            rentRepository.save(rent);
+        }
+    }
+
+    public void endRent(Long rentId, RentEndData endData,Long userId){
+        Optional<RentEntity> rentOpt = rentRepository.findById(rentId);
+        if(rentOpt.isPresent() && rentOpt.get().getIdUser() == userId){
+            RentEntity rent = rentOpt.get();
+            TransportEntity transport = transportRepository.findById(rent.getIdTransport()).get();
+            transport.setLatitude(endData.getLatitude());
+            transport.setLongitude(endData.getLongitude());
+            transportRepository.save(transport);
+            rent.setTimeEnd(new Date());
+        }
     }
 
 
