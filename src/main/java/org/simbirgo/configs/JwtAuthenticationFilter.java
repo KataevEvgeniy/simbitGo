@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private final String[] matchAdminPaths = {"/api/.*"};
-    private final String[] matchUserPaths = {"/api/Account/.*","/api/Payment/.*"};
+    private final String[] matchUserPaths = {"/api/Account/.*","/api/Transport.*","/api/Payment/.*","/api/Rent/.*"};
     private final String[] matchAnyPaths = {"/api/Account/SignIn","/api/Account/SignUp","/api/Transport/[0-9]*","/api/Rent/Transport"};
 
     private final String ROLE_ADMIN = "ROLE_ADMIN";

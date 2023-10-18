@@ -1,48 +1,47 @@
 package org.simbirgo.services;
 
-import org.simbirgo.entities.PriceTypeEntity;
+import org.simbirgo.entities.RentTypeEntity;
 import org.simbirgo.entities.RentEntity;
 import org.simbirgo.entities.TransportEntity;
 import org.simbirgo.entities.dto.RentEndData;
 import org.simbirgo.entities.dto.RentFindData;
-import org.simbirgo.repositories.PriceTypeEntityRepository;
+import org.simbirgo.repositories.RentTypeEntityRepository;
 import org.simbirgo.repositories.RentEntityRepository;
 import org.simbirgo.repositories.TransportEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class RentService {
 
     TransportEntityRepository transportRepository;
     RentEntityRepository rentRepository;
-    PriceTypeEntityRepository priceTypeRepository;
+    RentTypeEntityRepository priceTypeRepository;
 
     @Autowired
-    RentService(TransportEntityRepository transportRepository, RentEntityRepository rentRepository){
+    RentService(TransportEntityRepository transportRepository, RentEntityRepository rentRepository, RentTypeEntityRepository priceTypeRepository) {
         this.transportRepository = transportRepository;
         this.rentRepository = rentRepository;
+        this.priceTypeRepository = priceTypeRepository;
     }
 
 
-    public List<TransportEntity> findByRadius(RentFindData data){
+    public List<TransportEntity> findByRadius(RentFindData data) {
         double minLongitude = data.getLongitude() - data.getRadius();
         double maxLongitude = data.getLongitude() + data.getRadius();
         double minLatitude = data.getLatitude() - data.getRadius();
         double maxLatitude = data.getLatitude() + data.getRadius();
 
-        List<TransportEntity> transportsInSquare = transportRepository.findAllByCanBeRentedAndLongitudeBetweenAndLatitudeBetween(true,minLongitude,maxLongitude,minLatitude,maxLatitude);
+        List<TransportEntity> transportsInSquare = transportRepository.findAllByCanBeRentedAndLongitudeBetweenAndLatitudeBetween(true, minLongitude, maxLongitude, minLatitude, maxLatitude);
 
         List<TransportEntity> transportsInCircle = new ArrayList<>();
         transportsInSquare.forEach(transportEntity -> {
-            double distance = haversine(transportEntity.getLatitude(),transportEntity.getLongitude(), data.getLatitude(), data.getLongitude());
-            if( distance < data.getRadius()){
+            double distance = haversine(transportEntity.getLatitude(), transportEntity.getLongitude(), data.getLatitude(), data.getLongitude());
+            if (distance < data.getRadius()) {
                 transportsInCircle.add(transportEntity);
             }
         });
@@ -50,12 +49,12 @@ public class RentService {
     }
 
     @Nullable
-    public RentEntity findByRentId(Long rentId,Long userId){
-        Optional<RentEntity> rentOpt =  rentRepository.findById(rentId);
-        if(rentOpt.isPresent()){
+    public RentEntity findByRentId(Long rentId, Long userId) {
+        Optional<RentEntity> rentOpt = rentRepository.findById(rentId);
+        if (rentOpt.isPresent()) {
             RentEntity rent = rentOpt.get();
             TransportEntity transport = transportRepository.findById(rent.getIdTransport()).get();
-            if(rent.getIdUser() == userId && transport.getIdOwner() == userId){
+            if (rent.getIdUser() == userId && transport.getIdOwner() == userId) {
                 return rent;
             }
         }
@@ -63,45 +62,66 @@ public class RentService {
     }
 
 
-    public List<RentEntity> getRentHistory(Long userId){
+    public List<RentEntity> getRentHistory(Long userId) {
 
         return rentRepository.findAllByIdUser(userId);
     }
 
-    public List<RentEntity> getTransportHistory(Long transportId,Long userId){
+    public List<RentEntity> getTransportHistory(Long transportId, Long userId) {
         return rentRepository.findAllByIdTransport(transportId);
     }
 
-    public void rentNew(Long transportId, Long userId, PriceTypeEntity priceType){
-        PriceTypeEntity priceTypeEntityInDb = priceTypeRepository.findByPriceType(priceType.getPriceType());
+    public void rentNew(Long transportId, Long userId, RentTypeEntity rentType) {
+        RentTypeEntity validRentType = priceTypeRepository.findByRentType(rentType.getRentType());
+        if (validRentType == null) {
+            return;
+        }
         Optional<TransportEntity> transportOpt = transportRepository.findById(transportId);
 
-        if(transportOpt.isPresent()){
+        if (transportOpt.isPresent()) {
             TransportEntity transport = transportOpt.get();
             RentEntity rent = new RentEntity();
             rent.setTimeStart(new Date());
             rent.setIdTransport(transportId);
             rent.setIdUser(userId);
-            rent.setIdPriceType(priceType.getIdPriceType());
-            if (priceType.getPriceType().equals("Minutes")) {
+            rent.setIdPriceType(validRentType.getIdPriceType());
+            if (validRentType.getRentType().equals("Minutes")) {
                 rent.setPriceOfUnit(transport.getMinutePrice());
             }
-            if(priceType.getPriceType().equals("Days")){
+            if (validRentType.getRentType().equals("Days")) {
                 rent.setPriceOfUnit(transport.getDayPrice());
             }
             rentRepository.save(rent);
         }
     }
 
-    public void endRent(Long rentId, RentEndData endData,Long userId){
+    public void endRent(Long rentId, RentEndData endData, Long userId) {
+
+
         Optional<RentEntity> rentOpt = rentRepository.findById(rentId);
-        if(rentOpt.isPresent() && rentOpt.get().getIdUser() == userId){
+        if (rentOpt.isPresent() && rentOpt.get().getIdUser() == userId) {
             RentEntity rent = rentOpt.get();
             TransportEntity transport = transportRepository.findById(rent.getIdTransport()).get();
             transport.setLatitude(endData.getLatitude());
             transport.setLongitude(endData.getLongitude());
             transportRepository.save(transport);
+
+            Optional<RentTypeEntity> validRentType = priceTypeRepository.findById(rent.getIdPriceType());
+            if (validRentType.isEmpty()) {
+                return;
+            }
+
             rent.setTimeEnd(new Date());
+            double finalPrice = 0;
+            long diff = rent.getTimeStart().getTime() - rent.getTimeEnd().getTime();
+            if (validRentType.get().getRentType().equals("Minutes")){
+                finalPrice = rent.getPriceOfUnit() * TimeUnit.MILLISECONDS.toMinutes(diff);
+            }
+            if(validRentType.get().getRentType().equals("Days")){
+                finalPrice = rent.getPriceOfUnit() * TimeUnit.MILLISECONDS.toDays(diff);
+            }
+            rent.setFinalPrice(finalPrice);
+
         }
     }
 

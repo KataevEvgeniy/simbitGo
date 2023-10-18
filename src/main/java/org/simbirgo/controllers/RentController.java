@@ -1,12 +1,11 @@
 package org.simbirgo.controllers;
 
 
-import org.simbirgo.entities.PriceTypeEntity;
+import org.simbirgo.entities.RentTypeEntity;
 import org.simbirgo.entities.RentEntity;
 import org.simbirgo.entities.TransportEntity;
 import org.simbirgo.entities.dto.RentEndData;
 import org.simbirgo.entities.dto.RentFindData;
-import org.simbirgo.repositories.RentEntityRepository;
 import org.simbirgo.services.JwtService;
 import org.simbirgo.services.RentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,7 @@ public class RentController {
         try {
 
             Long userId = jwtService.getUserId(jws);
-            List<RentEntity> transportRentHistory = rentService.getTransportHistory(transportId,userId);
+            List<RentEntity> transportRentHistory = rentService.getTransportHistory(transportId, userId);
             return new ResponseEntity<>(transportRentHistory, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
@@ -82,7 +81,7 @@ public class RentController {
     }
 
     @PostMapping("/New/{transportId}")
-    public ResponseEntity<?> create(HttpServletRequest request, @PathVariable Long transportId, @RequestBody PriceTypeEntity rentType) {
+    public ResponseEntity<?> create(HttpServletRequest request, @PathVariable Long transportId, @RequestBody RentTypeEntity rentType) {
         String jws = request.getHeader("Authorization");
         try {
             Long userId = jwtService.getUserId(jws);
@@ -100,7 +99,7 @@ public class RentController {
         try {
             Long userId = jwtService.getUserId(jws);
             rentService.endRent(rentId, rentEndData, userId);
-            return new ResponseEntity<>("rent success", HttpStatus.OK);
+            return new ResponseEntity<>("rent ended", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }

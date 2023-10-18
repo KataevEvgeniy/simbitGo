@@ -1,9 +1,6 @@
 package org.simbirgo.controllers;
 
 
-import org.simbirgo.repositories.PriceTypeEntityRepository;
-import org.simbirgo.repositories.RentEntityRepository;
-import org.simbirgo.repositories.TransportEntityRepository;
 import org.simbirgo.services.JwtService;
 import org.simbirgo.services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
