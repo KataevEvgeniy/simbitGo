@@ -21,4 +21,5 @@ public class TransportDto {
     private Double longitude;
     private Double minutePrice;
     private Double dayPrice;
+    private Long ownerId;
 }

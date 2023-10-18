@@ -19,19 +19,27 @@ import java.util.Optional;
 public interface TransportEntityRepository extends JpaRepository<TransportEntity,Long> {
 
 
-    @Query("SELECT new org.simbirgo.entities.dto.TransportDto(t.canBeRented, tt.transportType, tm.model, c.color, t.identifier, t.description, t.latitude, t.longitude, t.minutePrice, t.dayPrice) " +
+    @Query("SELECT new org.simbirgo.entities.dto.TransportDto(t.canBeRented, tt.transportType, tm.model, c.color, t.identifier, t.description, t.latitude, t.longitude, t.minutePrice, t.dayPrice,t.idOwner) " +
             "FROM TransportEntity t " +
             "JOIN TransportModelEntity tm ON t.idModel = tm.idTransportModel " +
             "JOIN TransportTypeEntity tt ON t.idTransportType = tt.idTransportType " +
             "JOIN ColorEntity c ON t.idColor = c.idColor where t.idOwner = :idOwner" )
     public List<TransportDto> findByOwnerIdWithAllForeignTables(@Param("idOwner") Long ownerId);
 
-    @Query("SELECT new org.simbirgo.entities.dto.TransportDto(t.canBeRented, tt.transportType, tm.model, c.color, t.identifier, t.description, t.latitude, t.longitude, t.minutePrice, t.dayPrice) " +
+    @Query("SELECT new org.simbirgo.entities.dto.TransportDto(t.canBeRented, tt.transportType, tm.model, c.color, t.identifier, t.description, t.latitude, t.longitude, t.minutePrice, t.dayPrice,t.idOwner) " +
             "FROM TransportEntity t " +
             "JOIN TransportModelEntity tm ON t.idModel = tm.idTransportModel " +
             "JOIN TransportTypeEntity tt ON t.idTransportType = tt.idTransportType " +
             "JOIN ColorEntity c ON t.idColor = c.idColor where t.idTransport = :idTransport" )
     public TransportDto findByIdWithAllForeignTables(@Param("idTransport") Long transportId);
+
+    @Query("SELECT new org.simbirgo.entities.dto.TransportDto(t.canBeRented, tt.transportType, tm.model, c.color, t.identifier, t.description, t.latitude, t.longitude, t.minutePrice, t.dayPrice,t.idOwner) " +
+            "FROM TransportEntity t " +
+            "JOIN TransportModelEntity tm ON t.idModel = tm.idTransportModel " +
+            "JOIN TransportTypeEntity tt ON t.idTransportType = tt.idTransportType " +
+            "JOIN ColorEntity c ON t.idColor = c.idColor where t.idTransport between :start and :end and t.idTransportType = :idTransportType")
+    public List<TransportDto> findAllBetweenAndTransportType(@Param("start") Long start, @Param("end") Long end, @Param("idTransportType") Long idTransportType);
+
 
     public List<TransportEntity> findAllByCanBeRentedAndLongitudeBetweenAndLatitudeBetween(boolean canBeRented, double longitudeMin, double longitudeMax, double latitudeMin, double latitudeMax);
 }

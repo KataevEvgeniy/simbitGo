@@ -1,11 +1,14 @@
 package org.simbirgo.services;
 
 import org.simbirgo.entities.*;
+import org.simbirgo.entities.dto.SelectionTransportParams;
 import org.simbirgo.entities.dto.TransportDto;
 import org.simbirgo.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,12 +27,31 @@ public class TransportService {
         this.transportEntityRepository = transportEntityRepository;
     }
 
+    public List<TransportDto> getTransportsBy(SelectionTransportParams params) {
+        TransportTypeEntity transportType = transportTypeEntityRepository.findByTransportType(params.getTransportType());
+        List<TransportDto> transports = new ArrayList<>();
+        if (transportType != null) {
+
+            transports = transportEntityRepository.findAllBetweenAndTransportType(params.getStart(), params.getStart() + params.getCount(), transportType.getIdTransportType());
+        }
+        return transports;
+    }
+
+    public TransportDto getTransportById(Long transportId) {
+        return transportEntityRepository.findByIdWithAllForeignTables(transportId);
+    }
+
     public void saveTransport(TransportDto transportDto, Long userId) {
         TransportEntity transport = mapDto(transportDto, userId);
         transportEntityRepository.save(transport);
     }
 
-    private TransportEntity mapDto(TransportDto transportDto, Long userId) {
+    /*public void saveTransport(TransportDto transportDto){
+        TransportEntity transportEntity = mapDto(transportDto,transportDto.getOwnerId());
+        transportEntityRepository.save(transportEntity);
+    }*/
+
+    private TransportEntity mapDto(TransportDto transportDto, Long ownerId) {
         TransportEntity transportEntity = new TransportEntity();
         transportEntity.setCanBeRented(transportDto.isCanBeRented());
         transportEntity.setIdentifier(transportDto.getIdentifier());
@@ -63,7 +85,7 @@ public class TransportService {
         }
         transportEntity.setIdTransportType(transportTypeEntity.getIdTransportType());
 
-        transportEntity.setIdOwner(userId);
+        transportEntity.setIdOwner(ownerId);
 
         return transportEntity;
     }
@@ -77,11 +99,15 @@ public class TransportService {
         }
     }
 
-    public void deleteTransport(Long transportId,Long userId){
+    public void deleteTransport(Long transportId, Long userId) {
         Optional<TransportEntity> transportInDb = transportEntityRepository.findById(transportId);
         if (transportInDb.isPresent() && transportInDb.get().getIdOwner() == userId) {
             transportEntityRepository.deleteById(transportId);
         }
+    }
+
+    public void deleteTransport(Long transportId){
+        transportEntityRepository.deleteById(transportId);
     }
 
 }

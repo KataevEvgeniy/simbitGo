@@ -1,8 +1,13 @@
 package org.simbirgo.controllers.Admin;
 
+
 import org.simbirgo.entities.UserEntity;
+import org.simbirgo.entities.dto.SelectionTransportParams;
 import org.simbirgo.entities.dto.SelectionUsersParams;
+import org.simbirgo.entities.dto.TransportDto;
 import org.simbirgo.services.AccountService;
+import org.simbirgo.services.TransportService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,41 +16,41 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/Admin/Account")
-public class AdminAccountController {
+@RequestMapping("/Admin/Transport")
+public class AdminTransportController {
 
+    TransportService transportService;
 
-    AccountService accountService;
-
-    AdminAccountController(AccountService accountService){
-        this.accountService = accountService;
+    @Autowired
+    AdminTransportController(TransportService transportService){
+        this.transportService = transportService;
     }
 
 
     @GetMapping("")
-    public ResponseEntity<?> getAllUsers(@RequestBody SelectionUsersParams params){
+    public ResponseEntity<?> getAllTransports(@RequestBody SelectionTransportParams params){
         try {
-            List<UserEntity> users = accountService.getAllBy(params.getStart(),params.getCount());
-            return new ResponseEntity<>(users,HttpStatus.OK);
+            List<TransportDto> transports = transportService.getTransportsBy(params);
+            return new ResponseEntity<>(transports, HttpStatus.OK);
         } catch (Exception e){
-            return new ResponseEntity<>("invalid Data", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("", HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getByUserById(@PathVariable Long id){
         try {
-            UserEntity user = accountService.getUserById(id).get();
-            return new ResponseEntity<>(user,HttpStatus.OK);
+            TransportDto transport = transportService.getTransportById(id);
+            return new ResponseEntity<>(transport,HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>("invalid Data", HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("")
-    public ResponseEntity<?> create(@RequestBody UserEntity user){
+    public ResponseEntity<?> create(@RequestBody TransportDto transportDto){
         try{
-            accountService.createUser(user);
+            transportService.saveTransport(transportDto,transportDto.getOwnerId());
             return new ResponseEntity<>("Created",HttpStatus.CREATED);
         } catch (Exception e){
             return new ResponseEntity<>("invalid data",HttpStatus.BAD_REQUEST);
@@ -53,9 +58,9 @@ public class AdminAccountController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@RequestBody UserEntity user, @PathVariable Long id){
+    public ResponseEntity<?> update(@RequestBody TransportDto transportDto, @PathVariable Long id){
         try{
-            accountService.updateById(user,id);
+            transportService.updateTransport(transportDto,transportDto.getOwnerId(),id);
             return new ResponseEntity<>("updated",HttpStatus.CREATED);
         }catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.OK);
@@ -65,11 +70,10 @@ public class AdminAccountController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id){
         try{
-            accountService.deleteById(id);
+            transportService.deleteTransport(id);
             return new ResponseEntity<>("deleted",HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>("invalid data",HttpStatus.BAD_REQUEST);
         }
     }
-
 }

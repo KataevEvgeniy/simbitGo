@@ -15,7 +15,7 @@ public class TransportEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id_transport")
-    private long idTransport;
+    private Long idTransport;
     @Basic
     @Column(name = "can_be_rented")
     private boolean canBeRented;
@@ -45,7 +45,7 @@ public class TransportEntity {
     private Double dayPrice;
     @Basic
     @Column(name = "id_owner")
-    private long idOwner;
+    private Long idOwner;
     @Basic
     @Column(name="id_transport_type")
     private Long idTransportType;
