@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/Account")
@@ -37,18 +38,15 @@ public class AccountController {
 
     @PostMapping("/SignIn")
     public ResponseEntity<?> signIn(@RequestBody UserEntity user) {
-
-        UserEntity userInDb;
         try {
-
-            userInDb = repository.findUserEntityByUsername(user.getUsername());
-            if (userInDb.getPassword().equals(user.getPassword())) {
+            UserEntity userInDb = repository.findUserEntityByUsername(user.getUsername());
+            if (Objects.equals(userInDb.getPassword(),user.getPassword())) {
                 String jws = jwtService.generateJwtToken(userInDb.getIdUser());
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Authorization", jws);
                 return new ResponseEntity<>("Success", headers, HttpStatus.OK);
-            } else{
+            } else {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
@@ -62,16 +60,12 @@ public class AccountController {
         String jws = request.getHeader("Authorization");
 
         try {
-            if (jwtService.isJwtValid(jws)) {
-                Long userId = jwtService.getUserId(jws);
-                UserEntity user = repository.findById(userId).get();
+            Long userId = jwtService.getUserId(jws);
+            UserEntity user = repository.findById(userId).get();
 
-                return new ResponseEntity<>(user, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("unauthorized",HttpStatus.UNAUTHORIZED);
-            }
+            return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (Exception e) {
-             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -91,9 +85,9 @@ public class AccountController {
 
     @PutMapping("/Update")
     public ResponseEntity<?> update(HttpServletRequest request, @RequestBody UserEntity user) {
+        String jws = request.getHeader("Authorization");
         try {
-            String jws = request.getHeader("Authorization");
-            if (jwtService.isJwtValid(jws) && !repository.existsByUsername(user.getUsername())) {
+            if (!repository.existsByUsername(user.getUsername())) {
                 Long userId = jwtService.getUserId(jws);
                 UserEntity userInDb = repository.findById(userId).get();
                 userInDb.setPassword(user.getPassword());
@@ -101,9 +95,7 @@ public class AccountController {
                 repository.save(userInDb);
                 return new ResponseEntity<>("user updated", HttpStatus.OK);
             }
-
             return new ResponseEntity<>("username already exist", HttpStatus.CONFLICT);
-
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
@@ -113,13 +105,10 @@ public class AccountController {
     @PostMapping("/SignOut")
     public ResponseEntity<?> signOut(HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
-        if (jwtService.isJwtValid(jws)) {
-            if (blacklistEntityRepository.existsByToken(jws)) {
-                return new ResponseEntity<>("token already in blacklist", HttpStatus.OK);
-            }
-            blacklistEntityRepository.save(new BlacklistEntity(jws,0));
-            return new ResponseEntity<>("sign out",HttpStatus.OK);
+        if (blacklistEntityRepository.existsByToken(jws)) {
+            return new ResponseEntity<>("token already in blacklist", HttpStatus.OK);
         }
-        return new ResponseEntity<>("invalid data",HttpStatus.BAD_REQUEST);
+        blacklistEntityRepository.save(new BlacklistEntity(jws, 0));
+        return new ResponseEntity<>("sign out", HttpStatus.OK);
     }
 }

@@ -45,12 +45,8 @@ public class TransportController {
     public ResponseEntity<?> create(HttpServletRequest request, @RequestBody TransportDto transport) {
         String jws = request.getHeader("Authorization");
         try {
-            if (jwtService.isJwtValid(jws)) {
-                transportService.saveTransport(transport, jwtService.getUserId(jws));
-                return new ResponseEntity<>("transport saved", HttpStatus.CREATED);
-            } else {
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
+            transportService.saveTransport(transport, jwtService.getUserId(jws));
+            return new ResponseEntity<>("transport saved", HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
@@ -60,28 +56,20 @@ public class TransportController {
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody TransportDto transport, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {
-            if (jwtService.isJwtValid(jws)) {
-                transportService.updateTransport(transport, jwtService.getUserId(jws), id);
-                return new ResponseEntity<>("transport updated", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
+            transportService.updateTransport(transport, jwtService.getUserId(jws), id);
+            return new ResponseEntity<>("transport updated", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id,HttpServletRequest request){
+    public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {
-            if (jwtService.isJwtValid(jws)) {
-                Long userId = jwtService.getUserId(jws);
-                transportService.deleteTransport(id,userId);
-                return new ResponseEntity<>("transport deleted", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
+            Long userId = jwtService.getUserId(jws);
+            transportService.deleteTransport(id, userId);
+            return new ResponseEntity<>("transport deleted", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }

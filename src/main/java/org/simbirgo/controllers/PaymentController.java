@@ -24,22 +24,18 @@ public class PaymentController {
     JwtService jwtService;
 
     @Autowired
-    PaymentController(PaymentService paymentService,JwtService jwtService){
+    PaymentController(PaymentService paymentService, JwtService jwtService) {
         this.paymentService = paymentService;
         this.jwtService = jwtService;
     }
 
     @PostMapping("/Hesoyam/{accountId}")
-    public ResponseEntity<?> hesoyam(@PathVariable Long accountId, HttpServletRequest request){
+    public ResponseEntity<?> hesoyam(@PathVariable Long accountId, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {
-            if (jwtService.isJwtValid(jws)) {
-                Long userId = jwtService.getUserId(jws);
-                paymentService.hesoyam(accountId,userId);
-                return new ResponseEntity<>("hesoyam success", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
+            Long userId = jwtService.getUserId(jws);
+            paymentService.hesoyam(accountId, userId);
+            return new ResponseEntity<>("hesoyam success", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }

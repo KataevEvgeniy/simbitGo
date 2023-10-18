@@ -35,7 +35,6 @@ public class RentController {
 
     @GetMapping("/Transport")
     public ResponseEntity<?> getByRadius(@RequestBody RentFindData data) {
-
         try {
             List<TransportEntity> transportEntities = rentService.findByRadius(data);
             return new ResponseEntity<>(transportEntities, HttpStatus.OK);
@@ -48,13 +47,9 @@ public class RentController {
     public ResponseEntity<?> getByRentId(@PathVariable Long rentId, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {
-            if (jwtService.isJwtValid(jws)) {
-                Long userId = jwtService.getUserId(jws);
-                RentEntity rent = rentService.findByRentId(rentId, userId);
-                return new ResponseEntity<>(rent, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
+            Long userId = jwtService.getUserId(jws);
+            RentEntity rent = rentService.findByRentId(rentId, userId);
+            return new ResponseEntity<>(rent, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
@@ -64,13 +59,9 @@ public class RentController {
     public ResponseEntity<?> getHistory(HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {
-            if (jwtService.isJwtValid(jws)) {
-                Long userId = jwtService.getUserId(jws);
-                List<RentEntity> rentHistory = rentService.getRentHistory(userId);
-                return new ResponseEntity<>(rentHistory, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
+            Long userId = jwtService.getUserId(jws);
+            List<RentEntity> rentHistory = rentService.getRentHistory(userId);
+            return new ResponseEntity<>(rentHistory, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
@@ -80,13 +71,10 @@ public class RentController {
     public ResponseEntity<?> getTransportHistory(@PathVariable Long transportId, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {
-            if (jwtService.isJwtValid(jws)) {
-                Long userId = jwtService.getUserId(jws);
-                List<RentEntity> transportRentHistory = rentService.getTransportHistory(transportId);
-                return new ResponseEntity<>(transportRentHistory, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
+
+            Long userId = jwtService.getUserId(jws);
+            List<RentEntity> transportRentHistory = rentService.getTransportHistory(transportId,userId);
+            return new ResponseEntity<>(transportRentHistory, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
@@ -94,16 +82,12 @@ public class RentController {
     }
 
     @PostMapping("/New/{transportId}")
-    public ResponseEntity<?> create(HttpServletRequest request,@PathVariable Long transportId ,@RequestBody PriceTypeEntity rentType) {
+    public ResponseEntity<?> create(HttpServletRequest request, @PathVariable Long transportId, @RequestBody PriceTypeEntity rentType) {
         String jws = request.getHeader("Authorization");
         try {
-            if (jwtService.isJwtValid(jws)) {
-                Long userId = jwtService.getUserId(jws);
-                rentService.rentNew(transportId,userId,rentType);
-                return new ResponseEntity<>("rent success", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
+            Long userId = jwtService.getUserId(jws);
+            rentService.rentNew(transportId, userId, rentType);
+            return new ResponseEntity<>("rent success", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
@@ -111,16 +95,12 @@ public class RentController {
     }
 
     @PostMapping("/End/{rentId}")
-    public ResponseEntity<?> end(HttpServletRequest request,@PathVariable Long rentId ,@RequestBody RentEndData rentEndData) {
+    public ResponseEntity<?> end(HttpServletRequest request, @PathVariable Long rentId, @RequestBody RentEndData rentEndData) {
         String jws = request.getHeader("Authorization");
         try {
-            if (jwtService.isJwtValid(jws)) {
-                Long userId = jwtService.getUserId(jws);
-                rentService.endRent(rentId,rentEndData,userId);
-                return new ResponseEntity<>("rent success", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
+            Long userId = jwtService.getUserId(jws);
+            rentService.endRent(rentId, rentEndData, userId);
+            return new ResponseEntity<>("rent success", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }

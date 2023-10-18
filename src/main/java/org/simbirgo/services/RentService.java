@@ -68,7 +68,7 @@ public class RentService {
         return rentRepository.findAllByIdUser(userId);
     }
 
-    public List<RentEntity> getTransportHistory(Long transportId){
+    public List<RentEntity> getTransportHistory(Long transportId,Long userId){
         return rentRepository.findAllByIdTransport(transportId);
     }
 
