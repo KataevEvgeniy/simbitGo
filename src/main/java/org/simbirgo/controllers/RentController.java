@@ -98,7 +98,7 @@ public class RentController {
         String jws = request.getHeader("Authorization");
         try {
             Long userId = jwtService.getUserId(jws);
-            rentService.endRent(rentId, rentEndData, userId);
+            rentService.endRentUser(rentId, rentEndData, userId);
             return new ResponseEntity<>("rent ended", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);

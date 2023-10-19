@@ -61,6 +61,11 @@ public class RentService {
         return null;
     }
 
+    @Nullable
+    public RentEntity findByRentId(Long rentId) {
+        return rentRepository.findById(rentId).orElse(null);
+    }
+
 
     public List<RentEntity> getRentHistory(Long userId) {
 
@@ -68,8 +73,33 @@ public class RentService {
     }
 
     public List<RentEntity> getTransportHistory(Long transportId, Long userId) {
+        Optional<TransportEntity> transport = transportRepository.findById(transportId);
+        if (transport.isPresent() && transport.get().getIdOwner().equals(userId)) {
+            return rentRepository.findAllByIdTransport(transportId);
+        }
+        return new ArrayList<>();
+    }
+
+    public List<RentEntity> getTransportHistory(Long transportId) {
         return rentRepository.findAllByIdTransport(transportId);
     }
+
+    public void save(RentEntity rent){
+        rentRepository.save(rent);
+    }
+
+    public void update(RentEntity rent,Long rentId){
+        if(rentRepository.existsById(rentId)){
+            rentRepository.save(rent);
+        }
+    }
+
+    public void delete(Long rentId){
+        if(rentRepository.existsById(rentId)){
+            rentRepository.deleteById(rentId);
+        }
+    }
+
 
     public void rentNew(Long transportId, Long userId, RentTypeEntity rentType) {
         RentTypeEntity validRentType = priceTypeRepository.findByRentType(rentType.getRentType());
@@ -95,12 +125,16 @@ public class RentService {
         }
     }
 
-    public void endRent(Long rentId, RentEndData endData, Long userId) {
+    public void endRentUser(Long rentId, RentEndData endData, Long userId) {
 
 
         Optional<RentEntity> rentOpt = rentRepository.findById(rentId);
         if (rentOpt.isPresent() && rentOpt.get().getIdUser() == userId) {
-            RentEntity rent = rentOpt.get();
+            endRent(rentOpt.get(),endData);
+        }
+    }
+
+    private void endRent(RentEntity rent, RentEndData endData){
             TransportEntity transport = transportRepository.findById(rent.getIdTransport()).get();
             transport.setLatitude(endData.getLatitude());
             transport.setLongitude(endData.getLongitude());
@@ -114,14 +148,21 @@ public class RentService {
             rent.setTimeEnd(new Date());
             double finalPrice = 0;
             long diff = rent.getTimeStart().getTime() - rent.getTimeEnd().getTime();
-            if (validRentType.get().getRentType().equals("Minutes")){
+            if (validRentType.get().getRentType().equals("Minutes")) {
                 finalPrice = rent.getPriceOfUnit() * TimeUnit.MILLISECONDS.toMinutes(diff);
             }
-            if(validRentType.get().getRentType().equals("Days")){
+            if (validRentType.get().getRentType().equals("Days")) {
                 finalPrice = rent.getPriceOfUnit() * TimeUnit.MILLISECONDS.toDays(diff);
             }
             rent.setFinalPrice(finalPrice);
+            rentRepository.save(rent);
+    }
 
+
+    public void endRentAdmin(Long rentId,RentEndData endData){
+        Optional<RentEntity> rentOpt = rentRepository.findById(rentId);
+        if (rentOpt.isPresent()) {
+            endRent(rentOpt.get(),endData);
         }
     }
 

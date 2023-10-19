@@ -22,7 +22,8 @@ public class PaymentService {
 
     public void hesoyam(Long destinationAccountId, Long userId) {
         Optional<UserEntity> userOpt = userEntityRepository.findById(userId);
-        if (userOpt.isPresent() && Objects.equals(destinationAccountId, userId)) {
+        boolean accessCheat = userId.equals(destinationAccountId) || userOpt.get().isAdmin();
+        if (userOpt.isPresent() && accessCheat) {
             UserEntity user = userOpt.get();
             user.setBalance(user.getBalance() + 250000);
             userEntityRepository.save(user);
