@@ -1,5 +1,7 @@
 package org.simbirgo.controllers;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 import org.simbirgo.entities.TransportEntity;
 import org.simbirgo.entities.dto.TransportDto;
 import org.simbirgo.repositories.TransportEntityRepository;
@@ -42,6 +44,7 @@ public class TransportController {
     }
 
     @PostMapping("")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> create(HttpServletRequest request, @RequestBody TransportDto transport) {
         String jws = request.getHeader("Authorization");
         try {
@@ -53,6 +56,7 @@ public class TransportController {
     }
 
     @PutMapping("/{id}")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody TransportDto transport, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {
@@ -64,6 +68,7 @@ public class TransportController {
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {

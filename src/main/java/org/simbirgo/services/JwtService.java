@@ -30,7 +30,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .subject("user")
-                .subject("simbit_go_api")
+                .subject("simbir_go_api")
                 .claim("id", userId)
                 .signWith(key)
                 .compact();

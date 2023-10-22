@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final String[] matchAdminPaths = {"/api/.*"};
     private final String[] matchUserPaths = {"/api/Account/.*","/api/Transport.*","/api/Payment/.*","/api/Rent/.*"};
-    private final String[] matchAnyPaths = {"/api/Account/SignIn","/api/Account/SignUp","/api/Transport/[0-9]*","/api/Rent/Transport"};
+    private final String[] matchAnyPaths = {"/api/Account/SignIn","/api/Account/SignUp","/api/Transport/[0-9]*","/api/Rent/Transport","/api/swagger-ui/.*","/api/v3/api-docs","/api/swagger-resources.*"};
 
     private final String ROLE_ADMIN = "ROLE_ADMIN";
     private final String ROLE_USER = "ROLE_USER";

@@ -1,6 +1,8 @@
 package org.simbirgo.controllers;
 
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 import org.simbirgo.entities.RentTypeEntity;
 import org.simbirgo.entities.RentEntity;
 import org.simbirgo.entities.TransportEntity;
@@ -43,6 +45,7 @@ public class RentController {
     }
 
     @GetMapping("/{rentId}")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getByRentId(@PathVariable Long rentId, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {
@@ -55,6 +58,7 @@ public class RentController {
     }
 
     @GetMapping("/MyHistory")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getHistory(HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {
@@ -67,6 +71,7 @@ public class RentController {
     }
 
     @GetMapping("/TransportHistory/{transportId}")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getTransportHistory(@PathVariable Long transportId, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {
@@ -81,6 +86,7 @@ public class RentController {
     }
 
     @PostMapping("/New/{transportId}")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> create(HttpServletRequest request, @PathVariable Long transportId, @RequestBody RentTypeEntity rentType) {
         String jws = request.getHeader("Authorization");
         try {
@@ -94,6 +100,7 @@ public class RentController {
     }
 
     @PostMapping("/End/{rentId}")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> end(HttpServletRequest request, @PathVariable Long rentId, @RequestBody RentEndData rentEndData) {
         String jws = request.getHeader("Authorization");
         try {

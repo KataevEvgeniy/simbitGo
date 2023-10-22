@@ -1,6 +1,8 @@
 package org.simbirgo.controllers;
 
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 import org.postgresql.util.PSQLException;
 import org.simbirgo.entities.BlacklistEntity;
 import org.simbirgo.entities.UserEntity;
@@ -54,6 +56,7 @@ public class AccountController {
 
 
     @GetMapping("/Me")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> me(HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
 
@@ -82,6 +85,7 @@ public class AccountController {
     }
 
     @PutMapping("/Update")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> update(HttpServletRequest request, @RequestBody UserEntity user) {
         String jws = request.getHeader("Authorization");
         try {
@@ -101,6 +105,7 @@ public class AccountController {
 
 
     @PostMapping("/SignOut")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> signOut(HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         if (blacklistEntityRepository.existsByToken(jws)) {

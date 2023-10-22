@@ -1,6 +1,8 @@
 package org.simbirgo.controllers;
 
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 import org.simbirgo.services.JwtService;
 import org.simbirgo.services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ public class PaymentController {
     }
 
     @PostMapping("/Hesoyam/{accountId}")
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> hesoyam(@PathVariable Long accountId, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
         try {

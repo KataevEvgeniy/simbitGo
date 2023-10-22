@@ -18,7 +18,7 @@ public class AccountService {
     }
 
 
-    public List<UserEntity> getAllBy(int start,int count){
+    public List<UserEntity> getAllBy(Long start,Long count){
 
         List<UserEntity> userEntities = userRepository.findAllByIdUserBetween(start,start+count);
         return userEntities;
