@@ -1,0 +1,9 @@
+FROM postgres
+
+COPY database_dump.sql /docker-entrypoint-initdb.d/database_dump.sql
+COPY database_dump.sql /test-sql-dump/
+
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD postgres
+ENV POSTGRES_DB simbir_go
+
