@@ -35,12 +35,8 @@ public class TransportController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
-        try {
-            TransportDto transports = repository.findByIdWithAllForeignTables(id);
-            return new ResponseEntity<>(transports, HttpStatus.ACCEPTED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        TransportDto transport = transportService.getTransportById(id);
+        return new ResponseEntity<>(transport, HttpStatus.ACCEPTED);
     }
 
     @PostMapping("")

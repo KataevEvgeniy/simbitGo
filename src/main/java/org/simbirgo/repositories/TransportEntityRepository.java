@@ -31,7 +31,7 @@ public interface TransportEntityRepository extends JpaRepository<TransportEntity
             "JOIN TransportModelEntity tm ON t.idModel = tm.idTransportModel " +
             "JOIN TransportTypeEntity tt ON t.idTransportType = tt.idTransportType " +
             "JOIN ColorEntity c ON t.idColor = c.idColor where t.idTransport = :idTransport" )
-    public TransportDto findByIdWithAllForeignTables(@Param("idTransport") Long transportId);
+    public Optional<TransportDto> findByIdWithAllForeignTables(@Param("idTransport") Long transportId);
 
     @Query("SELECT new org.simbirgo.entities.dto.TransportDto(t.canBeRented, tt.transportType, tm.model, c.color, t.identifier, t.description, t.latitude, t.longitude, t.minutePrice, t.dayPrice,t.idOwner) " +
             "FROM TransportEntity t " +

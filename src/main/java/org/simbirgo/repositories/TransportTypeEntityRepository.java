@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface TransportTypeEntityRepository extends JpaRepository<TransportTypeEntity,Long> {
 
-    public TransportTypeEntity findByTransportType(String type);
+    public Optional<TransportTypeEntity> findByTransportType(String type);
 
 
 

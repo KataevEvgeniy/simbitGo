@@ -3,6 +3,8 @@ package org.simbirgo.services;
 import org.simbirgo.entities.*;
 import org.simbirgo.entities.dto.SelectionTransportParams;
 import org.simbirgo.entities.dto.TransportDto;
+import org.simbirgo.exceptions.InvalidDataException;
+import org.simbirgo.exceptions.NoRecordFoundException;
 import org.simbirgo.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,16 +31,21 @@ public class TransportService {
 
     public List<TransportDto> getTransportsBy(SelectionTransportParams params) {
         TransportTypeEntity transportType = transportTypeEntityRepository.findByTransportType(params.getTransportType());
-        List<TransportDto> transports = new ArrayList<>();
         if (transportType != null) {
 
-            transports = transportEntityRepository.findAllBetweenAndTransportType(params.getStart(), params.getStart() + params.getCount(), transportType.getIdTransportType());
+            List<TransportDto> transports = transportEntityRepository.findAllBetweenAndTransportType(params.getStart(), params.getStart() + params.getCount(), transportType.getIdTransportType());
+            return transports;
         }
-        return transports;
+        throw new NoRecordFoundException("Transports Not Found");
     }
 
     public TransportDto getTransportById(Long transportId) {
-        return transportEntityRepository.findByIdWithAllForeignTables(transportId);
+        Optional<TransportDto> transportDto = transportEntityRepository.findByIdWithAllForeignTables(transportId);
+        if(transportDto.isPresent()) {
+            System.out.println("FSASADs");
+            return transportDto.get();
+        }
+        throw new NoRecordFoundException("Transports Not Found");
     }
 
     public void saveTransport(TransportDto transportDto, Long userId) {
