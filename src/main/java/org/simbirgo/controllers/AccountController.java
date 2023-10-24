@@ -8,6 +8,8 @@ import org.simbirgo.entities.BlacklistEntity;
 import org.simbirgo.entities.UserEntity;
 import org.simbirgo.repositories.BlacklistEntityRepository;
 import org.simbirgo.repositories.UserEntityRepository;
+import org.simbirgo.services.AccountService;
+import org.simbirgo.services.BlackListService;
 import org.simbirgo.services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -25,32 +27,28 @@ public class AccountController {
 
 
     JwtService jwtService;
-    UserEntityRepository repository;
-    BlacklistEntityRepository blacklistEntityRepository;
+    AccountService accountService;
+    BlackListService blackListService;
 
     @Autowired
-    AccountController(JwtService jwtService, UserEntityRepository repository, BlacklistEntityRepository blacklistEntityRepository) {
+    AccountController(JwtService jwtService, AccountService accountService,BlackListService blackListService) {
         this.jwtService = jwtService;
-        this.repository = repository;
-        this.blacklistEntityRepository = blacklistEntityRepository;
+        this.accountService = accountService;
+        this.blackListService = blackListService;
     }
 
 
     @PostMapping("/SignIn")
     public ResponseEntity<?> signIn(@RequestBody UserEntity user) {
-        try {
-            UserEntity userInDb = repository.findUserEntityByUsername(user.getUsername());
-            if (Objects.equals(userInDb.getPassword(),user.getPassword())) {
-                String jws = jwtService.generateJwtToken(userInDb.getIdUser());
+        UserEntity userInDb = accountService.findUserByUsername(user.getUsername());
+        if (Objects.equals(userInDb.getPassword(), user.getPassword())) {
+            String jws = jwtService.generateJwtToken(userInDb.getIdUser());
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.add("Authorization", jws);
-                return new ResponseEntity<>("Success", headers, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>("user not found", HttpStatus.NOT_FOUND);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", jws);
+            return new ResponseEntity<>("Success", headers, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("password isn't valid",HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -59,48 +57,31 @@ public class AccountController {
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> me(HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
-
-        try {
-            Long userId = jwtService.getUserId(jws);
-            UserEntity user = repository.findById(userId).get();
-
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        Long userId = jwtService.getUserId(jws);
+        UserEntity user = accountService.findUserById(userId);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @PostMapping("/SignUp")
     public ResponseEntity<?> signUp(@RequestBody UserEntity user) {
-
-        try {
-            if (repository.existsByUsername(user.getUsername())) {
-                return new ResponseEntity<>("already exist", HttpStatus.CONFLICT);
-            }
-            repository.save(user);
-            return new ResponseEntity<>("user created", HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        UserEntity entity = new UserEntity();
+        entity.setAdmin(false);
+        entity.setUsername(user.getUsername());
+        entity.setPassword(user.getPassword());
+        accountService.createUser(entity);
+        return new ResponseEntity<>("user created", HttpStatus.CREATED);
     }
 
     @PutMapping("/Update")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> update(HttpServletRequest request, @RequestBody UserEntity user) {
         String jws = request.getHeader("Authorization");
-        try {
-            if (!repository.existsByUsername(user.getUsername())) {
-                Long userId = jwtService.getUserId(jws);
-                UserEntity userInDb = repository.findById(userId).get();
-                userInDb.setPassword(user.getPassword());
-                userInDb.setUsername(user.getUsername());
-                repository.save(userInDb);
-                return new ResponseEntity<>("user updated", HttpStatus.OK);
-            }
-            return new ResponseEntity<>("username already exist", HttpStatus.CONFLICT);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        Long userId = jwtService.getUserId(jws);
+        UserEntity userInDb = accountService.findUserById(userId);
+        userInDb.setPassword(user.getPassword());
+        userInDb.setUsername(user.getUsername());
+        accountService.updateById(userInDb, userId);
+        return new ResponseEntity<>("user updated", HttpStatus.OK);
     }
 
 
@@ -108,10 +89,7 @@ public class AccountController {
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> signOut(HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
-        if (blacklistEntityRepository.existsByToken(jws)) {
-            return new ResponseEntity<>("token already in blacklist", HttpStatus.OK);
-        }
-        blacklistEntityRepository.save(new BlacklistEntity(jws, 0));
+        blackListService.addToBlackList(jws);
         return new ResponseEntity<>("sign out", HttpStatus.OK);
     }
 }

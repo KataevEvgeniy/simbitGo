@@ -3,7 +3,6 @@ package org.simbirgo.controllers.Admin;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import org.simbirgo.entities.UserEntity;
-import org.simbirgo.entities.dto.SelectionUsersParams;
 import org.simbirgo.services.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +27,7 @@ public class AdminAccountController {
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getAllUsers(@RequestParam Long start, @RequestParam Long count) {
         try {
-            List<UserEntity> users = accountService.getAllBy(start, count);
+            List<UserEntity> users = accountService.findAllBy(start, count);
             return new ResponseEntity<>(users, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid Data", HttpStatus.BAD_REQUEST);
@@ -39,7 +38,7 @@ public class AdminAccountController {
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getByUserById(@PathVariable Long id) {
         try {
-            UserEntity user = accountService.getUserById(id).get();
+            UserEntity user = accountService.findUserById(id);
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid Data", HttpStatus.BAD_REQUEST);

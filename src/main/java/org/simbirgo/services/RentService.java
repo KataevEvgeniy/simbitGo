@@ -102,8 +102,8 @@ public class RentService {
 
 
     public void rentNew(Long transportId, Long userId, RentTypeEntity rentType) {
-        RentTypeEntity validRentType = priceTypeRepository.findByRentType(rentType.getRentType());
-        if (validRentType == null) {
+        Optional<RentTypeEntity> validRentType = priceTypeRepository.findByRentType(rentType.getRentType());
+        if (validRentType.isEmpty()) {
             return;
         }
         Optional<TransportEntity> transportOpt = transportRepository.findById(transportId);
@@ -114,11 +114,11 @@ public class RentService {
             rent.setTimeStart(new Date());
             rent.setIdTransport(transportId);
             rent.setIdUser(userId);
-            rent.setIdPriceType(validRentType.getIdPriceType());
-            if (validRentType.getRentType().equals("Minutes")) {
+            rent.setIdPriceType(validRentType.get().getIdPriceType());
+            if (validRentType.get().getRentType().equals("Minutes")) {
                 rent.setPriceOfUnit(transport.getMinutePrice());
             }
-            if (validRentType.getRentType().equals("Days")) {
+            if (validRentType.get().getRentType().equals("Days")) {
                 rent.setPriceOfUnit(transport.getDayPrice());
             }
             rentRepository.save(rent);

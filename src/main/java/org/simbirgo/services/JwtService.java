@@ -1,5 +1,6 @@
 package org.simbirgo.services;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -10,27 +11,35 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class JwtService {
 
     String secretKey = "secretKeyjfdfgnfjdknfhfbfbfbfjds";
 
-    UserEntityRepository repository;
+    UserEntityRepository userRepository;
+    BlackListService blackListService;
 
     @Autowired
-    JwtService(UserEntityRepository repository){
-        this.repository = repository;
+    JwtService(UserEntityRepository userRepository, BlackListService blackListService) {
+        this.userRepository = userRepository;
+        this.blackListService = blackListService;
     }
 
 
     public String generateJwtToken(Long userId) {
         byte[] keyBytes = secretKey.getBytes();
         SecretKey key = Keys.hmacShaKeyFor(keyBytes);
+        Calendar expirationDate = Calendar.getInstance();
+        expirationDate.add(Calendar.DAY_OF_MONTH, 1);
 
         return Jwts.builder()
                 .subject("user")
                 .subject("simbir_go_api")
+                .expiration(expirationDate.getTime())
                 .claim("id", userId)
                 .signWith(key)
                 .compact();
@@ -51,13 +60,15 @@ public class JwtService {
         }
     }
 
-    public boolean isJwtValid(String jws){
-        Long id = getUserId(jws);
-        if (id == null) {
-            return false;
-        }
+    public boolean isJwtValid(String jws) {
+        byte[] keyBytes = secretKey.getBytes();
+        SecretKey key = Keys.hmacShaKeyFor(keyBytes);
+        Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(jws).getPayload();
 
-        if(repository.existsById(id)){
+        Long id = Long.parseLong(claims.get("id").toString());
+        Date expDate = claims.getExpiration();
+
+        if (userRepository.existsById(id) && expDate.after(new Date()) && !blackListService.isExist(jws)) {
             return true;
         }
 

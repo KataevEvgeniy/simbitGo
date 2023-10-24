@@ -2,6 +2,7 @@ package org.simbirgo.configs;
 
 import org.simbirgo.entities.UserEntity;
 import org.simbirgo.repositories.UserEntityRepository;
+import org.simbirgo.services.AccountService;
 import org.simbirgo.services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,12 +25,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
 
-    private final UserEntityRepository userRepository;
+    private final AccountService accountService;
 
     @Autowired
-    JwtAuthenticationFilter(JwtService jwtService,UserEntityRepository userRepository){
+    JwtAuthenticationFilter(JwtService jwtService,AccountService accountService) {
             this.jwtService = jwtService;
-            this.userRepository = userRepository;
+            this.accountService = accountService;
     }
 
     private final String[] matchAdminPaths = {"/api/.*"};
@@ -53,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if(token != null && jwtService.isJwtValid(token)){
             Long userId = jwtService.getUserId(token);
-            UserEntity user = userRepository.findById(userId).get();
+            UserEntity user = accountService.findUserById(userId);
             String role = defineRole(user);
 
             if(Objects.equals(role, ROLE_USER) && isPathAllowed(matchUserPaths,path)){

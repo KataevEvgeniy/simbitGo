@@ -1,15 +1,12 @@
 package org.simbirgo.services;
 
 import org.simbirgo.entities.*;
-import org.simbirgo.entities.dto.SelectionTransportParams;
 import org.simbirgo.entities.dto.TransportDto;
-import org.simbirgo.exceptions.InvalidDataException;
 import org.simbirgo.exceptions.NoRecordFoundException;
 import org.simbirgo.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,19 +26,22 @@ public class TransportService {
         this.transportEntityRepository = transportEntityRepository;
     }
 
-    public List<TransportDto> getTransportsBy(SelectionTransportParams params) {
-        TransportTypeEntity transportType = transportTypeEntityRepository.findByTransportType(params.getTransportType());
-        if (transportType != null) {
-
-            List<TransportDto> transports = transportEntityRepository.findAllBetweenAndTransportType(params.getStart(), params.getStart() + params.getCount(), transportType.getIdTransportType());
-            return transports;
+    public List<TransportDto> findTransportsBy(Long start, Long count, String transportType) {
+        Optional<TransportTypeEntity> validTransportType = transportTypeEntityRepository.findByTransportType(transportType);
+        if (validTransportType.isEmpty()) {
+            throw new NoRecordFoundException("Transport Type not found");
         }
-        throw new NoRecordFoundException("Transports Not Found");
+        List<TransportDto> transports = transportEntityRepository.findAllBetweenAndTransportType(start, start + count - 1, validTransportType.get().getIdTransportType());
+        if (transports.isEmpty()) {
+            throw new NoRecordFoundException("Transports not found");
+        }
+        return transports;
     }
+
 
     public TransportDto getTransportById(Long transportId) {
         Optional<TransportDto> transportDto = transportEntityRepository.findByIdWithAllForeignTables(transportId);
-        if(transportDto.isPresent()) {
+        if (transportDto.isPresent()) {
             System.out.println("FSASADs");
             return transportDto.get();
         }
@@ -68,38 +68,45 @@ public class TransportService {
         transportEntity.setMinutePrice(transportDto.getMinutePrice());
         transportEntity.setDayPrice(transportDto.getDayPrice());
 
-        TransportModelEntity modelEntity = transportModelEntityRepository.findByModel(transportDto.getModel());
-        if (modelEntity == null) {
-            modelEntity = new TransportModelEntity();
-            modelEntity.setModel(transportDto.getModel());
-            modelEntity = transportModelEntityRepository.save(modelEntity);
-        }
-        transportEntity.setIdModel(modelEntity.getIdTransportModel());
-
-        ColorEntity colorEntity = colorEntityRepository.findByColor(transportDto.getColor());
-        if (colorEntity == null) {
-            colorEntity = new ColorEntity();
-            colorEntity.setColor(transportDto.getColor());
-            colorEntity = colorEntityRepository.save(colorEntity);
-        }
-        transportEntity.setIdColor(colorEntity.getIdColor());
-
-        TransportTypeEntity transportTypeEntity = transportTypeEntityRepository.findByTransportType(transportDto.getTransportType());
-        if (transportTypeEntity == null) {
-            transportTypeEntity = new TransportTypeEntity();
-            transportTypeEntity.setTransportType(transportDto.getTransportType());
-            transportTypeEntity = transportTypeEntityRepository.save(transportTypeEntity);
-        }
-        transportEntity.setIdTransportType(transportTypeEntity.getIdTransportType());
+        transportEntity.setIdModel(findTransportModel(transportDto.getModel()).getIdTransportModel());
+        transportEntity.setIdTransportType(findTransportType(transportDto.getTransportType()).getIdTransportType());
+        transportEntity.setIdColor(findTransportColor(transportDto.getColor()).getIdColor());
 
         transportEntity.setIdOwner(ownerId);
 
         return transportEntity;
     }
 
+    private TransportTypeEntity findTransportType(String transportType) {
+        Optional<TransportTypeEntity> validTransportType = transportTypeEntityRepository.findByTransportType(transportType);
+        if (validTransportType.isEmpty()) {
+            transportTypeEntityRepository.save(new TransportTypeEntity(0, transportType));
+            validTransportType = transportTypeEntityRepository.findByTransportType(transportType);
+        }
+        return validTransportType.get();
+    }
+
+    private TransportModelEntity findTransportModel(String transportModel) {
+        Optional<TransportModelEntity> validModelEntity = transportModelEntityRepository.findByModel(transportModel);
+        if (validModelEntity.isEmpty()) {
+            transportModelEntityRepository.save(new TransportModelEntity(0, transportModel));
+            validModelEntity = transportModelEntityRepository.findByModel(transportModel);
+        }
+        return validModelEntity.get();
+    }
+
+    private ColorEntity findTransportColor(String transportColor) {
+        Optional<ColorEntity> validColorEntity = colorEntityRepository.findByColor(transportColor);
+        if (validColorEntity.isEmpty()) {
+            colorEntityRepository.save(new ColorEntity(0, transportColor));
+            validColorEntity = colorEntityRepository.findByColor(transportColor);
+        }
+        return validColorEntity.get();
+    }
+
     public void updateTransport(TransportDto transportDto, Long userId, Long transportId) {
         Optional<TransportEntity> transportInDb = transportEntityRepository.findById(transportId);
-        if (transportInDb.isPresent() && transportInDb.get().getIdOwner() == userId) {
+        if (transportInDb.isPresent() && transportInDb.get().getIdOwner().longValue() == userId.longValue()) {
             TransportEntity transport = mapDto(transportDto, userId);
             transport.setIdTransport(transportId);
             transportEntityRepository.save(transport);
@@ -113,7 +120,7 @@ public class TransportService {
         }
     }
 
-    public void deleteTransport(Long transportId){
+    public void deleteTransport(Long transportId) {
         transportEntityRepository.deleteById(transportId);
     }
 

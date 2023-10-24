@@ -3,11 +3,7 @@ package org.simbirgo.controllers.Admin;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
-import org.simbirgo.entities.UserEntity;
-import org.simbirgo.entities.dto.SelectionTransportParams;
-import org.simbirgo.entities.dto.SelectionUsersParams;
 import org.simbirgo.entities.dto.TransportDto;
-import org.simbirgo.services.AccountService;
 import org.simbirgo.services.TransportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,13 +27,9 @@ public class AdminTransportController {
 
     @GetMapping("")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
-    public ResponseEntity<?> getAllTransports(@RequestBody SelectionTransportParams params) {
-        try {
-            List<TransportDto> transports = transportService.getTransportsBy(params);
+    public ResponseEntity<?> getAllTransports(@RequestParam Long start,@RequestParam Long count,@RequestParam String transportType) {
+            List<TransportDto> transports = transportService.findTransportsBy(start, count, transportType);
             return new ResponseEntity<>(transports, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("", HttpStatus.BAD_REQUEST);
-        }
     }
 
     @GetMapping("/{id}")
