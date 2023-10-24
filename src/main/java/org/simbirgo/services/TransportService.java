@@ -3,6 +3,7 @@ package org.simbirgo.services;
 import org.simbirgo.entities.*;
 import org.simbirgo.entities.dto.TransportDto;
 import org.simbirgo.exceptions.NoRecordFoundException;
+import org.simbirgo.exceptions.UserAccessException;
 import org.simbirgo.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,11 +54,6 @@ public class TransportService {
         transportEntityRepository.save(transport);
     }
 
-    /*public void saveTransport(TransportDto transportDto){
-        TransportEntity transportEntity = mapDto(transportDto,transportDto.getOwnerId());
-        transportEntityRepository.save(transportEntity);
-    }*/
-
     private TransportEntity mapDto(TransportDto transportDto, Long ownerId) {
         TransportEntity transportEntity = new TransportEntity();
         transportEntity.setCanBeRented(transportDto.isCanBeRented());
@@ -105,23 +101,32 @@ public class TransportService {
     }
 
     public void updateTransport(TransportDto transportDto, Long userId, Long transportId) {
-        Optional<TransportEntity> transportInDb = transportEntityRepository.findById(transportId);
-        if (transportInDb.isPresent() && transportInDb.get().getIdOwner().longValue() == userId.longValue()) {
+        if(transportEntityRepository.existsById(transportId)) {
             TransportEntity transport = mapDto(transportDto, userId);
             transport.setIdTransport(transportId);
             transportEntityRepository.save(transport);
+            return;
         }
-    }
-
-    public void deleteTransport(Long transportId, Long userId) {
-        Optional<TransportEntity> transportInDb = transportEntityRepository.findById(transportId);
-        if (transportInDb.isPresent() && transportInDb.get().getIdOwner() == userId) {
-            transportEntityRepository.deleteById(transportId);
-        }
+        throw new NoRecordFoundException("Transport not found");
     }
 
     public void deleteTransport(Long transportId) {
-        transportEntityRepository.deleteById(transportId);
+        if(transportEntityRepository.existsById(transportId)) {
+            transportEntityRepository.deleteById(transportId);
+            return;
+        }
+        throw new NoRecordFoundException("Transport not found");
+    }
+
+    public boolean isOwner(Long userId, Long transportId) {
+        Optional<TransportEntity> transportInDb = transportEntityRepository.findById(transportId);
+        if (transportInDb.isPresent()) {
+            if (transportInDb.get().getIdOwner().longValue() == userId.longValue()) {
+                return true;
+            }
+            return false;
+        }
+        throw new NoRecordFoundException("Transport not found");
     }
 
 }

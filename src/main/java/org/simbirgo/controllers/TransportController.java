@@ -22,14 +22,12 @@ import java.util.List;
 public class TransportController {
 
 
-    TransportEntityRepository repository;
     TransportService transportService;
     JwtService jwtService;
 
     @Autowired
-    TransportController(TransportEntityRepository repository, TransportService transportService, JwtService jwtService) {
+    TransportController(TransportService transportService, JwtService jwtService) {
         this.transportService = transportService;
-        this.repository = repository;
         this.jwtService = jwtService;
     }
 
@@ -43,36 +41,33 @@ public class TransportController {
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> create(HttpServletRequest request, @RequestBody TransportDto transport) {
         String jws = request.getHeader("Authorization");
-        try {
-            transportService.saveTransport(transport, jwtService.getUserId(jws));
-            return new ResponseEntity<>("transport saved", HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+
+        transportService.saveTransport(transport, jwtService.getUserId(jws));
+        return new ResponseEntity<>("transport saved", HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody TransportDto transport, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
-        try {
-            transportService.updateTransport(transport, jwtService.getUserId(jws), id);
+        Long userId = jwtService.getUserId(jws);
+        if (transportService.isOwner(userId, id)) {
+            transportService.updateTransport(transport, userId, id);
             return new ResponseEntity<>("transport updated", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>("You are not owner", HttpStatus.BAD_REQUEST);
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
-        try {
-            Long userId = jwtService.getUserId(jws);
-            transportService.deleteTransport(id, userId);
+
+        Long userId = jwtService.getUserId(jws);
+        if (transportService.isOwner(userId, id)) {
+            transportService.deleteTransport(id);
             return new ResponseEntity<>("transport deleted", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>("You are not owner", HttpStatus.BAD_REQUEST);
     }
 }
