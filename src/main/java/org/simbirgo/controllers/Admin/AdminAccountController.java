@@ -26,56 +26,36 @@ public class AdminAccountController {
     @GetMapping("")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getAllUsers(@RequestParam Long start, @RequestParam Long count) {
-        try {
-            List<UserEntity> users = accountService.findAllBy(start, count);
-            return new ResponseEntity<>(users, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid Data", HttpStatus.BAD_REQUEST);
-        }
+        List<UserEntity> users = accountService.findAllBy(start, count);
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getByUserById(@PathVariable Long id) {
-        try {
-            UserEntity user = accountService.findUserById(id);
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid Data", HttpStatus.BAD_REQUEST);
-        }
+        UserEntity user = accountService.findUserById(id);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @PostMapping("")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> create(@RequestBody UserEntity user) {
-        try {
-            accountService.createUser(user);
-            return new ResponseEntity<>("Created", HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        accountService.createUser(user);
+        return new ResponseEntity<>("Created", HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> update(@RequestBody UserEntity user, @PathVariable Long id) {
-        try {
-            accountService.updateById(user, id);
-            return new ResponseEntity<>("updated", HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.OK);
-        }
+        accountService.updateById(user, id);
+        return new ResponseEntity<>("updated", HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        try {
-            accountService.deleteById(id);
-            return new ResponseEntity<>("deleted", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        accountService.deleteById(id);
+        return new ResponseEntity<>("deleted", HttpStatus.OK);
     }
 
 }

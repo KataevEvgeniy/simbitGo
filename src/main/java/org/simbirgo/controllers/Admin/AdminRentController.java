@@ -29,78 +29,50 @@ public class AdminRentController {
     @GetMapping("/{rentId}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getRent(@PathVariable Long rentId) {
-        try {
-            RentEntity rent = rentService.findByRentId(rentId);
-            return new ResponseEntity<>(rent, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        RentEntity rent = rentService.findByRentId(rentId);
+        return new ResponseEntity<>(rent, HttpStatus.OK);
     }
 
     @GetMapping("/UserHistory/{userId}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getUserHistory(@PathVariable Long userId) {
-        try {
-            List<RentEntity> rents = rentService.getRentHistory(userId);
-            return new ResponseEntity<>(rents, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        List<RentEntity> rents = rentService.findRentHistory(userId);
+        return new ResponseEntity<>(rents, HttpStatus.OK);
     }
 
     @GetMapping("/TransportHistory/{transportId}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getTransportHistory(@PathVariable Long transportId) {
-        try {
-            List<RentEntity> rents = rentService.getTransportHistory(transportId);
-            return new ResponseEntity<>(rents, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        List<RentEntity> rents = rentService.findTransportHistory(transportId);
+        return new ResponseEntity<>(rents, HttpStatus.OK);
     }
 
     @PostMapping("")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> saveRent(@RequestBody RentEntity rentEntity) {
-        try {
-            rentService.save(rentEntity);
-            return new ResponseEntity<>("saved", HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        rentService.save(rentEntity);
+        return new ResponseEntity<>("saved", HttpStatus.CREATED);
     }
 
     @PostMapping("/End/{rentId}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
-    public ResponseEntity<?> endRent(@PathVariable Long rentId, @RequestBody RentEndData endData) {
-        try {
-            rentService.endRentAdmin(rentId, endData);
-            return new ResponseEntity<>("end", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> endRent(@PathVariable Long rentId, @RequestParam("lat") Double latitude, @RequestParam("long") Double longitude) {
+        rentService.endRentAdmin(rentId, latitude, longitude);
+        return new ResponseEntity<>("end", HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody RentEntity rent) {
-        try {
-            rentService.update(rent, id);
-            return new ResponseEntity<>("updated", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        rentService.update(rent, id);
+        return new ResponseEntity<>("updated", HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        try {
-            rentService.delete(id);
-            return new ResponseEntity<>("deleted", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
+        rentService.delete(id);
+        return new ResponseEntity<>("deleted", HttpStatus.OK);
     }
 
 
