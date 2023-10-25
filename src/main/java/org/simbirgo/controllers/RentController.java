@@ -35,9 +35,9 @@ public class RentController {
 
 
     @GetMapping("/Transport")
-    public ResponseEntity<?> getByRadius(@RequestBody RentFindData data) {
+    public ResponseEntity<?> getByRadius(@RequestParam("lat") Double latitude, @RequestParam("long") Double longitude, @RequestParam Long radius,@RequestParam String type ) {
         try {
-            List<TransportEntity> transportEntities = rentService.findByRadius(data);
+            List<TransportEntity> transportEntities = rentService.findByRadius(latitude, longitude, radius, type);
             return new ResponseEntity<>(transportEntities, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);

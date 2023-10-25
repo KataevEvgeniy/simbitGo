@@ -1,10 +1,12 @@
 package org.simbirgo.services;
 
+import lombok.extern.java.Log;
 import org.simbirgo.entities.RentTypeEntity;
 import org.simbirgo.entities.RentEntity;
 import org.simbirgo.entities.TransportEntity;
 import org.simbirgo.entities.dto.RentEndData;
 import org.simbirgo.entities.dto.RentFindData;
+import org.simbirgo.exceptions.NoRecordFoundException;
 import org.simbirgo.repositories.RentTypeEntityRepository;
 import org.simbirgo.repositories.RentEntityRepository;
 import org.simbirgo.repositories.TransportEntityRepository;
@@ -21,27 +23,32 @@ public class RentService {
     TransportEntityRepository transportRepository;
     RentEntityRepository rentRepository;
     RentTypeEntityRepository priceTypeRepository;
+    TransportService transportService;
+
 
     @Autowired
-    RentService(TransportEntityRepository transportRepository, RentEntityRepository rentRepository, RentTypeEntityRepository priceTypeRepository) {
+    RentService(TransportEntityRepository transportRepository, RentEntityRepository rentRepository, RentTypeEntityRepository priceTypeRepository, TransportService transportService) {
         this.transportRepository = transportRepository;
         this.rentRepository = rentRepository;
         this.priceTypeRepository = priceTypeRepository;
+        this.transportService = transportService;
     }
 
 
-    public List<TransportEntity> findByRadius(RentFindData data) {
-        double minLongitude = data.getLongitude() - data.getRadius();
-        double maxLongitude = data.getLongitude() + data.getRadius();
-        double minLatitude = data.getLatitude() - data.getRadius();
-        double maxLatitude = data.getLatitude() + data.getRadius();
+    public List<TransportEntity> findByRadius(Double latitude, Double longitude, Long radius, String type) {
+        double minLongitude = longitude - radius;
+        double maxLongitude = longitude + radius;
+        double minLatitude = latitude - radius;
+        double maxLatitude = latitude + radius;
 
         List<TransportEntity> transportsInSquare = transportRepository.findAllByCanBeRentedAndLongitudeBetweenAndLatitudeBetween(true, minLongitude, maxLongitude, minLatitude, maxLatitude);
-
+        if(transportsInSquare.isEmpty()){
+            throw new NoRecordFoundException("No transports found");
+        }
         List<TransportEntity> transportsInCircle = new ArrayList<>();
         transportsInSquare.forEach(transportEntity -> {
-            double distance = haversine(transportEntity.getLatitude(), transportEntity.getLongitude(), data.getLatitude(), data.getLongitude());
-            if (distance < data.getRadius()) {
+            double distance = getDistanceInKmByHaversineMethod(transportEntity.getLatitude(), transportEntity.getLongitude(), latitude, longitude);
+            if (distance < radius) {
                 transportsInCircle.add(transportEntity);
             }
         });
@@ -167,7 +174,7 @@ public class RentService {
     }
 
 
-    private double haversine(double lat1, double lng1, double lat2, double lng2) {
+    private double getDistanceInKmByHaversineMethod(double lat1, double lng1, double lat2, double lng2) {
         double earthRadius = 6371;
 
         double dLat = Math.toRadians(lat2 - lat1);

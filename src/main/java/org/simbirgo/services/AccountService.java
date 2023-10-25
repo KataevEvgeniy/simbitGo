@@ -14,13 +14,11 @@ import java.util.Optional;
 @Service
 public class AccountService {
 
-
     UserEntityRepository userRepository;
 
     AccountService(UserEntityRepository userRepository) {
         this.userRepository = userRepository;
     }
-
 
     public List<UserEntity> findAllBy(Long start, Long count) {
         List<UserEntity> userEntities = userRepository.findAllByIdUserBetween(start, start + count);
@@ -40,7 +38,7 @@ public class AccountService {
 
     public UserEntity findUserByUsername(String username) {
         Optional<UserEntity> user = userRepository.findUserEntityByUsername(username);
-        if(user.isPresent()){
+        if (user.isPresent()) {
             return user.get();
         }
         throw new NoRecordFoundException("User not found");
@@ -55,16 +53,12 @@ public class AccountService {
     }
 
     public void updateById(UserEntity user, Long userId) {
-        Optional<UserEntity> userOpt = userRepository.findById(userId);
-        if (userOpt.isPresent()) {
-            if (Objects.equals(userOpt.get().getUsername(), user.getUsername()) || !userRepository.existsByUsername(user.getUsername())) {
-                user.setIdUser(userId);
-                userRepository.save(user);
-                return;
-            }
-            throw new InvalidDataException("Username already exist");
+        if (!userRepository.existsByUsername(user.getUsername()) || Objects.equals(findUserByUsername(user.getUsername()).getIdUser(), userId)) {
+            user.setIdUser(userId);
+            userRepository.save(user);
+            return;
         }
-        throw new NoRecordFoundException("User not found");
+        throw new InvalidDataException("Username already exist");
     }
 
     public void deleteById(Long userId) {

@@ -32,15 +32,9 @@ public class PaymentController {
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> hesoyam(@PathVariable Long accountId, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
-        try {
-            Long userId = jwtService.getUserId(jws);
-            paymentService.hesoyam(accountId, userId);
-            return new ResponseEntity<>("hesoyam success", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("invalid data", HttpStatus.BAD_REQUEST);
-        }
-
-
+        Long userId = jwtService.getUserId(jws);
+        paymentService.hesoyam(accountId, userId);
+        return new ResponseEntity<>("hesoyam success", HttpStatus.OK);
     }
 
 }

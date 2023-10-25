@@ -2,6 +2,7 @@ package org.simbirgo.services;
 
 
 import org.simbirgo.entities.UserEntity;
+import org.simbirgo.exceptions.UserAccessException;
 import org.simbirgo.repositories.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,22 +13,25 @@ import java.util.Optional;
 @Service
 public class PaymentService {
 
-    UserEntityRepository userEntityRepository;
+    AccountService accountService;
 
     @Autowired
-    PaymentService(UserEntityRepository userEntityRepository) {
-        this.userEntityRepository = userEntityRepository;
+    PaymentService(AccountService accountService) {
+        this.accountService = accountService;
     }
 
 
     public void hesoyam(Long destinationAccountId, Long userId) {
-        Optional<UserEntity> userOpt = userEntityRepository.findById(userId);
-        boolean accessCheat = userId.equals(destinationAccountId) || userOpt.get().isAdmin();
-        if (userOpt.isPresent() && accessCheat) {
-            UserEntity user = userOpt.get();
-            user.setBalance(user.getBalance() + 250000);
-            userEntityRepository.save(user);
+        UserEntity destinationUser = accountService.findUserById(destinationAccountId);
+        UserEntity actionUser = accountService.findUserById(userId);
+        boolean accessCheat = userId.equals(destinationAccountId) || actionUser.isAdmin();
+        if (accessCheat) {
+            double balance = destinationUser.getBalance()== null ? 0.0 : destinationUser.getBalance();
+            destinationUser.setBalance(balance + 250000);
+            accountService.updateById(destinationUser,userId);
+            return;
         }
+        throw new UserAccessException("Didn't access");
     }
 
 }
