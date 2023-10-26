@@ -39,7 +39,12 @@ public interface TransportEntityRepository extends JpaRepository<TransportEntity
             "JOIN TransportTypeEntity tt ON t.idTransportType = tt.idTransportType " +
             "JOIN ColorEntity c ON t.idColor = c.idColor where t.idTransport between :start and :end and t.idTransportType = :idTransportType")
     List<TransportDto> findAllBetweenAndTransportType(@Param("start") Long start, @Param("end") Long end, @Param("idTransportType") Long idTransportType);
-
+    @Query("SELECT new org.simbirgo.entities.dto.TransportDto(t.canBeRented, tt.transportType, tm.model, c.color, t.identifier, t.description, t.latitude, t.longitude, t.minutePrice, t.dayPrice,t.idOwner) " +
+            "FROM TransportEntity t " +
+            "JOIN TransportModelEntity tm ON t.idModel = tm.idTransportModel " +
+            "JOIN TransportTypeEntity tt ON t.idTransportType = tt.idTransportType " +
+            "JOIN ColorEntity c ON t.idColor = c.idColor where t.idTransport between :start and :end and t.idTransportType = :idTransportType")
+    List<TransportDto> findAllBetween(@Param("start") Long start, @Param("end") Long end);
 
     List<TransportEntity> findAllByCanBeRentedAndLongitudeBetweenAndLatitudeBetween(boolean canBeRented, double longitudeMin, double longitudeMax, double latitudeMin, double latitudeMax);
 

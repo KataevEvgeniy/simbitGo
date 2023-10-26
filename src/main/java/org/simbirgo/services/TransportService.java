@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -29,12 +30,18 @@ public class TransportService {
 
     public List<TransportDto> findTransportsBy(Long start, Long count, String transportType) {
         Optional<TransportTypeEntity> validTransportType = transportTypeEntityRepository.findByTransportType(transportType);
-        if (validTransportType.isEmpty()) {
-            throw new NoRecordFoundException("Transport Type not found");
-        }
-        List<TransportDto> transports = transportEntityRepository.findAllBetweenAndTransportType(start, start + count - 1, validTransportType.get().getIdTransportType());
-        if (transports.isEmpty()) {
-            throw new NoRecordFoundException("Transports not found");
+
+        List<TransportDto> transports;
+        if(Objects.equals(transportType, "All")){
+            transports = transportEntityRepository.findAllBetween(start, start + count - 1);
+        } else{
+            if (validTransportType.isEmpty()) {
+                throw new NoRecordFoundException("Transport Type not found");
+            }
+            transports = transportEntityRepository.findAllBetweenAndTransportType(start, start + count - 1, validTransportType.get().getIdTransportType());
+            if (transports.isEmpty()) {
+                throw new NoRecordFoundException("Transports not found");
+            }
         }
         return transports;
     }

@@ -186,6 +186,10 @@ public class RentService {
             throw new NoRecordFoundException("Transport not found");
         }
 
+        if(transportService.isOwner(userId,transportId)){
+            throw new UserAccessException("Owner cannot rent his own transport");
+        }
+
         TransportEntity transport = transportOpt.get();
         RentEntity rent = new RentEntity();
         rent.setTimeStart(new Date());
