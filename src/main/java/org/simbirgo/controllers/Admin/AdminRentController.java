@@ -52,14 +52,14 @@ public class AdminRentController {
     public ResponseEntity<?> saveRent(@RequestBody RentEntity rentEntity) {
         rentService.save(rentEntity);
         return new ResponseEntity<>("saved", HttpStatus.CREATED);
-    }//TODO: добавить проверку на правильного пользователя
+    }
 
     @PostMapping("/End/{rentId}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> endRent(@PathVariable Long rentId, @RequestParam("lat") Double latitude, @RequestParam("long") Double longitude) {
         rentService.endRentAdmin(rentId, latitude, longitude);
         return new ResponseEntity<>("end", HttpStatus.OK);
-    }//TODO: добавить проверку на правильного пользователя
+    }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
