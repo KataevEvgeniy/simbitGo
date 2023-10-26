@@ -29,14 +29,16 @@ public class RentService {
     RentTypeEntityRepository priceTypeRepository;
     TransportService transportService;
     TransportTypeEntityRepository transportTypeEntityRepository;
+    AccountService accountService;
 
     @Autowired
-    RentService(TransportEntityRepository transportRepository, RentEntityRepository rentRepository, RentTypeEntityRepository priceTypeRepository, TransportService transportService, TransportTypeEntityRepository transportTypeEntityRepository) {
+    RentService(TransportEntityRepository transportRepository, RentEntityRepository rentRepository, RentTypeEntityRepository priceTypeRepository, TransportService transportService, TransportTypeEntityRepository transportTypeEntityRepository,AccountService accountService) {
         this.transportRepository = transportRepository;
         this.rentRepository = rentRepository;
         this.priceTypeRepository = priceTypeRepository;
         this.transportService = transportService;
         this.transportTypeEntityRepository = transportTypeEntityRepository;
+        this.accountService = accountService;
     }
 
 
@@ -121,6 +123,7 @@ public class RentService {
         throw new NoRecordFoundException("No rent found");
     }
 
+
     public RentEntity findByRentId(Long rentId) {
         Optional<RentEntity> rentOpt = rentRepository.findById(rentId);
         if (rentOpt.isPresent()) {
@@ -158,10 +161,12 @@ public class RentService {
     }
 
     public void save(RentEntity rent) {
+        checkRentFields(rent);
         rentRepository.save(rent);
     }
 
     public void update(RentEntity rent, Long rentId) {
+        checkRentFields(rent);
         if (rentRepository.existsById(rentId)) {
             rentRepository.save(rent);
             return;
@@ -175,6 +180,18 @@ public class RentService {
             return;
         }
         throw new NoRecordFoundException("Rent not found");
+    }
+
+    private void checkRentFields(RentEntity rent) {
+        if(!transportService.existById(rent.getIdTransport())) {
+            throw new NoRecordFoundException("Transport not found");
+        }
+        if(!accountService.existUserById(rent.getIdUser())) {
+            throw new NoRecordFoundException("Renter not found");
+        }
+        if(!priceTypeRepository.existsById(rent.getIdPriceType())) {
+            throw new NoRecordFoundException("RentType not found");
+        }
     }
 
 
@@ -237,6 +254,7 @@ public class RentService {
     }
 
     private void endRent(RentEntity rent, Double latitude, Double longitude) {
+        checkRentFields(rent);
         TransportEntity transport = transportRepository.findById(rent.getIdTransport()).get();
         transport.setLatitude(latitude);
         transport.setLongitude(longitude);

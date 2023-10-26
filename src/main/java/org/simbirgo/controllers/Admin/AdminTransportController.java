@@ -44,14 +44,14 @@ public class AdminTransportController {
     public ResponseEntity<?> create(@RequestBody TransportDto transportDto) {
         transportService.saveTransport(transportDto, transportDto.getOwnerId());
         return new ResponseEntity<>("Created", HttpStatus.CREATED);
-    }   //TODO: добавить проверку на правильного пользователя
+    }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> update(@RequestBody TransportDto transportDto, @PathVariable Long id) {
         transportService.updateTransport(transportDto, transportDto.getOwnerId(), id);
         return new ResponseEntity<>("updated", HttpStatus.CREATED);
-    }//TODO: добавить проверку на правильного пользователя
+    }
 
     @DeleteMapping("/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})

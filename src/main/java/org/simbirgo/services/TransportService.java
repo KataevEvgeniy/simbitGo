@@ -19,13 +19,15 @@ public class TransportService {
     ColorEntityRepository colorEntityRepository;
     TransportTypeEntityRepository transportTypeEntityRepository;
     TransportEntityRepository transportEntityRepository;
+    AccountService accountService;
 
     @Autowired
-    TransportService(TransportModelEntityRepository transportModelEntityRepository, ColorEntityRepository colorEntityRepository, TransportTypeEntityRepository transportTypeEntityRepository, TransportEntityRepository transportEntityRepository) {
+    TransportService(TransportModelEntityRepository transportModelEntityRepository, ColorEntityRepository colorEntityRepository, TransportTypeEntityRepository transportTypeEntityRepository, TransportEntityRepository transportEntityRepository,AccountService accountService) {
         this.transportModelEntityRepository = transportModelEntityRepository;
         this.colorEntityRepository = colorEntityRepository;
         this.transportTypeEntityRepository = transportTypeEntityRepository;
         this.transportEntityRepository = transportEntityRepository;
+        this.accountService = accountService;
     }
 
     public List<TransportDto> findTransportsBy(Long start, Long count, String transportType) {
@@ -57,6 +59,9 @@ public class TransportService {
     }
 
     public void saveTransport(TransportDto transportDto, Long userId) {
+        if(!accountService.existUserById(userId)) {
+            throw new NoRecordFoundException("User not found");
+        }
         TransportEntity transport = mapDto(transportDto, userId);
         transportEntityRepository.save(transport);
     }
@@ -107,7 +112,16 @@ public class TransportService {
         return validColorEntity.get();
     }
 
+    public boolean existById(Long transportId){
+        return transportEntityRepository.existsById(transportId);
+    }
+
+
     public void updateTransport(TransportDto transportDto, Long userId, Long transportId) {
+        if(!accountService.existUserById(userId)) {
+            throw new NoRecordFoundException("User not found");
+        }
+
         if(transportEntityRepository.existsById(transportId)) {
             TransportEntity transport = mapDto(transportDto, userId);
             transport.setIdTransport(transportId);

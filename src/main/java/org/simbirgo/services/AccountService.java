@@ -44,6 +44,10 @@ public class AccountService {
         throw new NoRecordFoundException("User not found");
     }
 
+    public boolean existUserById(Long userId) {
+        return userRepository.existsById(userId);
+    }
+
     public void createUser(UserEntity user) {
         if (!userRepository.existsByUsername(user.getUsername())) {
             userRepository.save(user);
