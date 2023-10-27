@@ -34,7 +34,7 @@ public class TransportService {
         Optional<TransportTypeEntity> validTransportType = transportTypeEntityRepository.findByTransportType(transportType);
 
         List<TransportDto> transports;
-        if(Objects.equals(transportType, "All")){
+        if(Objects.equals(transportType.toLowerCase(), "all")){
             transports = transportEntityRepository.findAllBetween(start, start + count - 1);
         } else{
             if (validTransportType.isEmpty()) {
@@ -52,7 +52,6 @@ public class TransportService {
     public TransportDto getTransportById(Long transportId) {
         Optional<TransportDto> transportDto = transportEntityRepository.findByIdWithAllForeignTables(transportId);
         if (transportDto.isPresent()) {
-            System.out.println("FSASADs");
             return transportDto.get();
         }
         throw new NoRecordFoundException("Transports Not Found");

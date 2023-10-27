@@ -28,7 +28,7 @@ public class PaymentService {
         if (accessCheat) {
             double balance = destinationUser.getBalance()== null ? 0.0 : destinationUser.getBalance();
             destinationUser.setBalance(balance + 250000);
-            accountService.updateById(destinationUser,userId);
+            accountService.updateById(destinationUser,destinationAccountId);
             return;
         }
         throw new UserAccessException("Didn't access");
