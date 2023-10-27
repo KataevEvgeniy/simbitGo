@@ -2,6 +2,8 @@
 
 # GitHub https://github.com/KataevEvgeniy/simbitGo
 
+## Для тестирования можете использовать postman загрузив Simbir Go.postman_collection.json
+
 ## 1.Удаленный API и база данных
 ### API: http://92.63.177.142:8080/api/swagger-ui/#/
 ### Для подключения в pgAdmin user - postgres pass - postgres db - simbir_go
