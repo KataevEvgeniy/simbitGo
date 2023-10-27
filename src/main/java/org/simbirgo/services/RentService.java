@@ -1,12 +1,10 @@
 package org.simbirgo.services;
 
-import lombok.extern.java.Log;
 import org.simbirgo.entities.RentTypeEntity;
 import org.simbirgo.entities.RentEntity;
 import org.simbirgo.entities.TransportEntity;
 import org.simbirgo.entities.TransportTypeEntity;
-import org.simbirgo.entities.dto.RentEndData;
-import org.simbirgo.entities.dto.RentFindData;
+import org.simbirgo.entities.dto.RentDto;
 import org.simbirgo.exceptions.InvalidDataException;
 import org.simbirgo.exceptions.NoRecordFoundException;
 import org.simbirgo.exceptions.UserAccessException;
@@ -15,7 +13,6 @@ import org.simbirgo.repositories.RentEntityRepository;
 import org.simbirgo.repositories.TransportEntityRepository;
 import org.simbirgo.repositories.TransportTypeEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -160,15 +157,23 @@ public class RentService {
         return rents;
     }
 
-    public void save(RentEntity rent) {
-        checkRentFields(rent);
-        rentRepository.save(rent);
+    public void save(RentDto rentDto) {
+        RentEntity entity = new RentEntity();
+        entity.setIdTransport(rentDto.getTransportId());
+        entity.setIdUser(rentDto.getUserId());
+        entity.setTimeStart(rentDto.getTimeStart());
+        entity.setTimeEnd(rentDto.getTimeEnd());
+        entity.setPriceOfUnit(rentDto.getPriceOfUnit());
+
+        entity.setIdPriceType(defineRentType(rentDto.getPriceType()).getIdPriceType());
+        checkRentFields(entity);
+
+        rentRepository.save(entity);
     }
 
-    public void update(RentEntity rent, Long rentId) {
-        checkRentFields(rent);
+    public void update(RentDto rentDto,Long rentId) {
         if (rentRepository.existsById(rentId)) {
-            rentRepository.save(rent);
+            save(rentDto);
             return;
         }
         throw new NoRecordFoundException("Rent not found");
@@ -188,9 +193,6 @@ public class RentService {
         }
         if(!accountService.existUserById(rent.getIdUser())) {
             throw new NoRecordFoundException("Renter not found");
-        }
-        if(!priceTypeRepository.existsById(rent.getIdPriceType())) {
-            throw new NoRecordFoundException("RentType not found");
         }
     }
 
@@ -213,6 +215,7 @@ public class RentService {
         rent.setIdTransport(transportId);
         rent.setIdUser(userId);
         rent.setIdPriceType(rentTypeEntity.getIdPriceType());
+
         if (rentTypeEntity.getRentType().equals("Minutes")) {
             if(transport.getMinutePrice() == null) {
                 throw new InvalidDataException("Minute price is not allowed for this transport");
@@ -266,7 +269,7 @@ public class RentService {
         }
 
         rent.setTimeEnd(new Date());
-        long diff = rent.getTimeStart().getTime() - rent.getTimeEnd().getTime();
+        long diff = rent.getTimeEnd().getTime() - rent.getTimeStart().getTime();
         if (validRentType.get().getRentType().equals("Minutes")) {
             rent.setFinalPrice(rent.getPriceOfUnit() * TimeUnit.MILLISECONDS.toMinutes(diff));
         }

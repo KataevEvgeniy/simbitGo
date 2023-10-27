@@ -15,25 +15,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = InvalidDataException.class)
     public ResponseEntity<?> handleInvalidDataException(InvalidDataException e){
-        System.out.println("Invalid data ianaidgnasdkmnjjfjnfdn");
         return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = NoRecordFoundException.class)
     public ResponseEntity<?> handleNoRecordFoundException(NoRecordFoundException e){
-        System.out.println("Invalid data ianaidgnasdkmnjjfjnfdn");
         return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = RecordAlreadyExistException.class)
     public ResponseEntity<?> handleRecordAlreadyExistException(RecordAlreadyExistException e){
-        System.out.println("Invalid data ianaidgnasdkmnjjfjnfdn");
         return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = UserAccessException.class)
     public ResponseEntity<?> handleUserAccessException(UserAccessException e){
-        System.out.println("Invalid data ianaidgnasdkmnjjfjnfdn");
         return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }

@@ -1,5 +1,6 @@
 package org.simbirgo.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,9 +28,11 @@ public class RentEntity {
     private Date timeEnd;
     @Basic
     @Column(name = "id_transport")
+    @JsonProperty("transportId")
     private long idTransport;
     @Basic
     @Column(name = "id_user")
+    @JsonProperty("userId")
     private long idUser;
     @Basic
     @Column(name = "price_of_unit")

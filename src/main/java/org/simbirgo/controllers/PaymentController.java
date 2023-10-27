@@ -32,7 +32,7 @@ public class PaymentController {
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> hesoyam(@PathVariable Long accountId, HttpServletRequest request) {
         String jws = request.getHeader("Authorization");
-        Long userId = jwtService.getUserId(jws);
+        Long userId = jwtService.getUserId(jws);//TODO: check is admin
         paymentService.hesoyam(accountId, userId);
         return new ResponseEntity<>("hesoyam success", HttpStatus.OK);
     }

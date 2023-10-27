@@ -6,8 +6,6 @@ import io.swagger.annotations.Authorization;
 import org.simbirgo.entities.RentTypeEntity;
 import org.simbirgo.entities.RentEntity;
 import org.simbirgo.entities.TransportEntity;
-import org.simbirgo.entities.dto.RentEndData;
-import org.simbirgo.entities.dto.RentFindData;
 import org.simbirgo.services.JwtService;
 import org.simbirgo.services.RentService;
 import org.springframework.beans.factory.annotation.Autowired;

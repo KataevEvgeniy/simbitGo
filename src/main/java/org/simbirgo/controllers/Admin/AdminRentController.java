@@ -4,8 +4,7 @@ package org.simbirgo.controllers.Admin;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import org.simbirgo.entities.RentEntity;
-import org.simbirgo.entities.dto.RentEndData;
-import org.simbirgo.repositories.RentEntityRepository;
+import org.simbirgo.entities.dto.RentDto;
 import org.simbirgo.services.RentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/Admin/Rent")
+@RequestMapping("/Admin")
 public class AdminRentController {
 
 
@@ -26,7 +25,7 @@ public class AdminRentController {
     }
 
 
-    @GetMapping("/{rentId}")
+    @GetMapping("/Rent/{rentId}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> getRent(@PathVariable Long rentId) {
         RentEntity rent = rentService.findByRentId(rentId);
@@ -47,28 +46,28 @@ public class AdminRentController {
         return new ResponseEntity<>(rents, HttpStatus.OK);
     }
 
-    @PostMapping("")
+    @PostMapping("/Rent")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
-    public ResponseEntity<?> saveRent(@RequestBody RentEntity rentEntity) {
-        rentService.save(rentEntity);
+    public ResponseEntity<?> saveRent(@RequestBody RentDto rentDto) {
+        rentService.save(rentDto);
         return new ResponseEntity<>("saved", HttpStatus.CREATED);
     }
 
-    @PostMapping("/End/{rentId}")
+    @PostMapping("/Rent/End/{rentId}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> endRent(@PathVariable Long rentId, @RequestParam("lat") Double latitude, @RequestParam("long") Double longitude) {
         rentService.endRentAdmin(rentId, latitude, longitude);
         return new ResponseEntity<>("end", HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/Rent/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody RentEntity rent) {
-        rentService.update(rent, id);
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody RentDto rentDto) {
+        rentService.update(rentDto, id);
         return new ResponseEntity<>("updated", HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/Rent/{id}")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "Authorization")})
     public ResponseEntity<?> delete(@PathVariable Long id) {
         rentService.delete(id);
